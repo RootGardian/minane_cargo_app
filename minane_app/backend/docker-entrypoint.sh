@@ -8,17 +8,25 @@ echo "=========================================================="
 PGDATA="${PGDATA:-/var/lib/postgresql/data}"
 export PGDATA
 
+# Préparation stricte des dossiers et permissions PostgreSQL
+mkdir -p "$PGDATA" /run/postgresql
+chown -R postgres:postgres "$PGDATA" /run/postgresql
+chmod 0700 "$PGDATA"
+chmod 0775 /run/postgresql
+
 # 1. Vérifier si une base distante est configurée ou s'il faut démarrer PostgreSQL local
 if [ -n "$DATABASE_URL" ] && ! echo "$DATABASE_URL" | grep -qE "localhost|127\.0\.0\.1"; then
   echo "🌐 Utilisation de la base de données distante fournie : $DATABASE_URL"
 else
   echo "🐘 Configuration et lancement du PostgreSQL local embarqué..."
+
+  # Nettoyage d'un éventuel verrou de crash précédent
+  rm -f "$PGDATA/postmaster.pid"
   
   # Initialisation du cluster si PG_VERSION n'existe pas encore
   if [ ! -s "$PGDATA/PG_VERSION" ]; then
     echo "⚙️ Initialisation d'une nouvelle base PostgreSQL..."
-    chown -R postgres:postgres "$PGDATA" /run/postgresql 2>/dev/null || true
-    su-exec postgres initdb -D "$PGDATA" --auth-local=trust --auth-host=trust -E UTF8 > /dev/null
+    su-exec postgres initdb -D "$PGDATA" --auth-local=trust --auth-host=trust -E UTF8
     
     # Tuning léger pour conteneur 512 Mo
     echo "listen_addresses = '127.0.0.1'" >> "$PGDATA/postgresql.conf"
@@ -32,9 +40,15 @@ else
   echo "🚀 Démarrage du service PostgreSQL..."
   su-exec postgres pg_ctl -D "$PGDATA" -o "-k /run/postgresql" -w start
 
+  # Attente active de la disponibilité de PostgreSQL
+  until su-exec postgres pg_isready -h 127.0.0.1 -p 5432 -q; do
+    echo "⏳ En attente de PostgreSQL sur 127.0.0.1:5432..."
+    sleep 1
+  done
+
   # Création du rôle et de la base si inexistants
   echo "🔑 Vérification de l'utilisateur et de la base minane_db..."
-  su-exec postgres psql -U postgres -v ON_ERROR_STOP=1 <<-EOSQL > /dev/null 2>&1
+  su-exec postgres psql -U postgres -v ON_ERROR_STOP=1 <<-EOSQL > /dev/null 2>&1 || true
     DO \$\$
     BEGIN
       IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'minane_user') THEN
@@ -45,7 +59,7 @@ else
 EOSQL
 
   su-exec postgres psql -U postgres -tc "SELECT 1 FROM pg_database WHERE datname = 'minane_db'" | grep -q 1 || \
-    su-exec postgres psql -U postgres -c "CREATE DATABASE minane_db OWNER minane_user;" > /dev/null 2>&1
+    su-exec postgres psql -U postgres -c "CREATE DATABASE minane_db OWNER minane_user;" > /dev/null 2>&1 || true
 
   export DATABASE_URL="postgresql://minane_user:minane_password@127.0.0.1:5432/minane_db?schema=public"
   echo "✅ Base PostgreSQL locale active et connectée."
