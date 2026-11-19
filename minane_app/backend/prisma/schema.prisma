@@ -54,6 +54,9 @@ model Container {
   shipments       Shipment[]
   expenses        ContainerExpense[]
   createdAt       DateTime           @default(now())
+
+  @@index([status])
+  @@index([createdAt])
 }
 
 model ContainerExpense {
@@ -64,6 +67,8 @@ model ContainerExpense {
   createdAt   DateTime        @default(now())
   containerId String
   container   Container       @relation(fields: [containerId], references: [id], onDelete: Cascade)
+
+  @@index([containerId])
 }
 
 model Shipment {
@@ -85,6 +90,12 @@ model Shipment {
   payments      Payment[]
   history       StatusHistory[]
   createdAt     DateTime        @default(now())
+
+  @@index([status])
+  @@index([clientId])
+  @@index([containerId])
+  @@index([createdAt])
+  @@index([pickupPin])
 }
 
 model Payment {
@@ -96,6 +107,9 @@ model Payment {
   paidAt     DateTime      @default(now())
   shipmentId String
   shipment   Shipment      @relation(fields: [shipmentId], references: [id])
+
+  @@index([shipmentId])
+  @@index([paidAt])
 }
 
 model StatusHistory {
@@ -105,6 +119,9 @@ model StatusHistory {
   createdAt  DateTime       @default(now())
   shipmentId String
   shipment   Shipment       @relation(fields: [shipmentId], references: [id])
+
+  @@index([shipmentId])
+  @@index([createdAt])
 }
 
 enum TransportMode {

@@ -1,10 +1,10 @@
-# 🚢 Minane Cargo - Application Web Métier Full-Stack
+#  Minane Cargo - Application Web Métier Full-Stack
 
 Application web métier complète pour **Minane Cargo**, société de transit et de fret international opérant exclusivement sur le corridor **Chine (Guangzhou  ) → Sénégal (Port de Dakar / AIBD)**.
 
 ---
 
-## 🛠️ Stack Technique & Architecture
+##  Stack Technique & Architecture
 
 - **Frontend :** React 18, Vite, Tailwind CSS, Lucide React Icons.
 - **Backend :** Node.js, Express, Prisma ORM, PostgreSQL 18, JWT (`bcryptjs` + `jsonwebtoken`).
@@ -19,7 +19,7 @@ Application web métier complète pour **Minane Cargo**, société de transit et
 
 ---
 
-## 🔑 Identifiants Démo
+##  Identifiants Démo
 
 
 ### 2. Espace Grossiste (Sandaga /  Dakar)
@@ -38,7 +38,7 @@ Application web métier complète pour **Minane Cargo**, société de transit et
 
 ---
 
-## 🚀 Démarrage Rapide
+##  Démarrage Rapide
 
 ### 1. Démarrer le Backend Express (Port 5050)
 ```bash
@@ -58,7 +58,7 @@ L'application sera accessible sur `http://localhost:3000`.
 
 ---
 
-## 📦 Fonctionnalités Clés Implémentées
+##  Fonctionnalités Clés Implémentées
 
 ### 1. Landing Page Publique
 - Barre de suivi instantané par code unique (`MNC-XXXX`) sans compte.

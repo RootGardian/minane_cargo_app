@@ -1,4 +1,6 @@
 require('dotenv').config();
+const path = require('path');
+const fs = require('fs');
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
@@ -72,6 +74,29 @@ app.get('/api/health', (req, res) => {
     timestamp: new Date().toISOString()
   });
 });
+
+// ─── Serve Frontend Static Build (Production / Docker) ─────────────────────────
+const possibleDistPaths = [
+  process.env.CLIENT_BUILD_PATH,
+  path.join(__dirname, '../public_frontend'),
+  path.join(__dirname, '../../frontend/dist'),
+  path.join(__dirname, '../dist')
+].filter(Boolean);
+
+const frontendDist = possibleDistPaths.find(p => fs.existsSync(p));
+
+if (frontendDist) {
+  console.log(`📦 Distribution frontend détectée : ${frontendDist}`);
+  app.use(express.static(frontendDist));
+
+  // SPA fallback pour les routes client (landing, admin, tracking, etc.)
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) {
+      return next();
+    }
+    res.sendFile(path.join(frontendDist, 'index.html'));
+  });
+}
 
 // ─── 404 handler (don't leak route info) ──────────────────────────────────────
 app.use((req, res) => {

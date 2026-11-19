@@ -70,13 +70,13 @@ function securityHeaders(req, res, next) {
   if (process.env.NODE_ENV === 'production') {
     res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
   }
-  // Content Security Policy
+  // Content Security Policy (compatible SPA React / Vite)
   res.setHeader('Content-Security-Policy',
-    "default-src 'none'; " +
-    "script-src 'self'; " +
-    "style-src 'self'; " +
-    "img-src 'self' data:; " +
-    "font-src 'self'; " +
+    "default-src 'self'; " +
+    "script-src 'self' 'unsafe-inline'; " +
+    "style-src 'self' 'unsafe-inline'; " +
+    "img-src 'self' data: https:; " +
+    "font-src 'self' data:; " +
     "connect-src 'self'; " +
     "frame-ancestors 'none';"
   );
@@ -129,9 +129,12 @@ function buildCorsOptions() {
 
   return {
     origin(origin, callback) {
-      // Allow requests with no origin (mobile apps, curl, Postman in dev)
-      if (!origin && process.env.NODE_ENV !== 'production') return callback(null, true);
+      // Allow requests with no origin (same-origin, curl, Postman, mobile apps)
+      if (!origin) return callback(null, true);
       if (whitelist.includes(origin)) return callback(null, true);
+      if (process.env.APP_URL && origin === process.env.APP_URL.replace(/\/$/, '')) {
+        return callback(null, true);
+      }
       callback(new Error(`CORS: origine non autorisée — ${origin}`));
     },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],

@@ -1,0 +1,40 @@
+# ==============================================================================
+# MINANE CARGO — Render Blueprint (Déploiement Automatisé 1-Clic)
+# ==============================================================================
+version: "1"
+
+services:
+  # ─── Service Web Unique (Frontend Vite + Backend Express via Docker) ──────────
+  - type: web
+    name: minane-cargo-app
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    region: frankfurt
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: DATABASE_URL
+        fromDatabase:
+          name: minane-cargo-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ADMIN_EMAIL
+        value: admin@minanecargo.sn
+      - key: ADMIN_PASSWORD
+        value: AdminMinane2026!
+      - key: ADMIN_NAME
+        value: Gestionnaire Minane Cargo
+
+databases:
+  # ─── Base de Données PostgreSQL Gérée par Render ─────────────────────────────
+  - name: minane-cargo-db
+    databaseName: minane_db
+    user: minane_user
+    plan: free
+    region: frankfurt
+

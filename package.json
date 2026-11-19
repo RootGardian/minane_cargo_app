@@ -1,0 +1,29 @@
+{
+  "name": "minane-cargo-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Minane Cargo — Plateforme Maritime Chine (Guangzhou) ➔ Sénégal (Dakar)",
+  "scripts": {
+    "dev:backend": "npm --prefix minane_app/backend run dev",
+    "dev:frontend": "npm --prefix minane_app/frontend run dev",
+    "build": "npm --prefix minane_app/frontend run build",
+    "start": "npm --prefix minane_app/backend start",
+    "test": "node minane_app/backend/test_secu.js",
+    "db:push": "node minane_app/backend/node_modules/prisma/build/index.js db push --schema minane_app/backend/prisma/schema.prisma",
+    "db:seed": "node minane_app/backend/prisma/seed.js",
+    "db:studio": "node minane_app/backend/node_modules/prisma/build/index.js studio --schema minane_app/backend/prisma/schema.prisma"
+  },
+  "keywords": [
+    "minane-cargo",
+    "freight",
+    "maritime",
+    "senegal",
+    "dakar",
+    "guangzhou",
+    "tracking",
+    "logistics"
+  ],
+  "author": "Minane Cargo",
+  "license": "UNLICENSED"
+}
+
