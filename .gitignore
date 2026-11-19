@@ -48,3 +48,6 @@ build/
 .DS_Store
 Thumbs.db
 
+# Legacy / local folders (ignored on remote repository)
+/frontend/
+
