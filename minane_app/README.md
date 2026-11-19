@@ -17,21 +17,10 @@ Application web métier complète pour **Minane Cargo**, société de transit et
 
 ---
 
-## 🗄️ Base de Données Locale PostgreSQL
-
-- **Nom de la base :** `minane_db`
-- **Utilisateur :** `postgres`
-- **Mot de passe :** `Maina22@5`
-- **Port :** `5432`
-- **URL de connexion :** `postgresql://postgres:Maina22%405@localhost:5432/minane_db?schema=public`
-
 ---
 
 ## 🔑 Identifiants Démo
 
-### 1. Back-Office Administrateur
-- **Email :** `admin@minanecargo.sn`
-- **Mot de passe :** `AdminMinane2026!`
 
 ### 2. Espace Grossiste (Sandaga /  Dakar)
 - **Grossiste 1 :** Moussa Diop (Sandaga Import)
