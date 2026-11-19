@@ -22,9 +22,9 @@ Le tout s'exécute dans **un seul et unique conteneur Docker** !
 
 1. Connectez-vous sur votre compte [Render.com](https://dashboard.render.com).
 2. Cliquez sur **New +** en haut à droite, puis sélectionnez **Blueprint**.
-3. Liez votre dépôt GitHub `minane_cargo_app` (ou `minane_cargo`).
+3. Liez votre dépôt GitHub `minane_cargo`.
 4. Render va détecter automatiquement le fichier `render.yaml` :
-   - Il crée le Web Service Docker `minane-cargo-app`.
+   - Il crée le Web Service Docker `minane-cargo`.
    - Il configure les variables de production automatiquement.
 5. Cliquez sur **Apply**.
 6. En 3 à 5 minutes, votre conteneur est compilé et en ligne ! 🎉
@@ -36,7 +36,7 @@ Le tout s'exécute dans **un seul et unique conteneur Docker** !
 1. Sur Render, cliquez sur **New +** > **Web Service**.
 2. Liez votre dépôt GitHub.
 3. Paramètres :
-   - **Name** : `minane-cargo-app`
+   - **Name** : `minane-cargo`
    - **Region** : `Frankfurt (EU Central)`
    - **Branch** : `main`
    - **Runtime** : `Docker`

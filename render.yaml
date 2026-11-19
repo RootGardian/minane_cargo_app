@@ -8,7 +8,7 @@ version: "1"
 services:
   # ─── Service Web Unique Tout-en-Un (Front + Back + Base de Données) ───────────
   - type: web
-    name: minane-cargo-app
+    name: minane-cargo
     runtime: docker
     dockerfilePath: ./Dockerfile
     plan: free
