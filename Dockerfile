@@ -1,6 +1,7 @@
 # ==============================================================================
-# MINANE CARGO — Dockerfile Multi-Stage Unifié (Frontend Vite + Backend Express)
-# Conçu pour déploiement en 1 clic sur Render (Web Service Docker)
+# MINANE CARGO — Dockerfile Multi-Stage Unifié Tout-en-Un (All-in-One)
+# Frontend React (Vite) + Backend Node.js (Express) + Base PostgreSQL intégrée
+# Conçu pour déploiement en 1 seul conteneur sur Render (Free Tier sans expiration)
 # ==============================================================================
 
 # ─── ÉTAPE 1 : Compilation du Frontend React ──────────────────────────────────
@@ -15,12 +16,17 @@ RUN npm ci
 COPY minane_app/frontend/ ./
 RUN npm run build
 
-# ─── ÉTAPE 2 : Image d'exécution Backend & Serveur ────────────────────────────
+# ─── ÉTAPE 2 : Image d'exécution Backend + PostgreSQL + SPA Serveur ───────────
 FROM node:20-alpine AS runner
 WORKDIR /app
 
-# Installation des dépendances système requises par Prisma sur Alpine Linux
-RUN apk add --no-cache openssl
+# Installation des dépendances système : OpenSSL (Prisma), PostgreSQL et su-exec
+RUN apk add --no-cache openssl postgresql postgresql-contrib su-exec
+
+# Préparation des dossiers PostgreSQL pour l'utilisateur système postgres
+RUN mkdir -p /var/lib/postgresql/data /run/postgresql && \
+    chown -R postgres:postgres /var/lib/postgresql /run/postgresql && \
+    chmod 0700 /var/lib/postgresql/data /run/postgresql
 
 # Copie des dépendances du backend et du schéma Prisma
 COPY minane_app/backend/package*.json ./
@@ -32,7 +38,7 @@ RUN npm ci --omit=dev && npx prisma generate
 # Copie des sources du backend
 COPY minane_app/backend/src ./src/
 
-# Copie du script d'initialisation et démarrage
+# Copie du script d'initialisation et démarrage tout-en-un
 COPY minane_app/backend/docker-entrypoint.sh ./docker-entrypoint.sh
 RUN chmod +x ./docker-entrypoint.sh
 
@@ -43,10 +49,13 @@ COPY --from=frontend-builder /app/frontend/dist ./public_frontend
 ENV NODE_ENV=production
 ENV PORT=5000
 ENV CLIENT_BUILD_PATH=/app/public_frontend
+ENV PGDATA=/var/lib/postgresql/data
+
+# Volume optionnel pour la persistance des données sur Render Disk ou Docker Volume
+VOLUME ["/var/lib/postgresql/data"]
 
 # Port exposé (Render injecte automatiquement la variable PORT)
 EXPOSE 5000
 
-# Démarrage avec le script d'entrée (synchronisation Prisma + lancement Node)
+# Démarrage avec le script d'entrée (PostgreSQL + Prisma push/seed + Express)
 CMD ["./docker-entrypoint.sh"]
-

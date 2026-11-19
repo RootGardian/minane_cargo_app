@@ -1,14 +1,20 @@
-# 🚀 Guide de Déploiement 1-Clic sur Render (Docker) — Minane Cargo
+# 🚀 Guide de Déploiement 1-Clic sur Render (Docker Tout-en-Un) — Minane Cargo
 
-Ce projet est configuré avec un **Dockerfile multi-stage unifié** qui compile le Frontend React (Vite) et démarre le Backend Express (Node.js + Prisma) dans **un seul conteneur Docker**.
+Ce projet est configuré avec un **Dockerfile multi-stage tout-en-un** qui embarque :
+1. **Frontend React** (Vite + Tailwind CSS + jsPDF)
+2. **Backend API Express** (Node.js + Prisma ORM + Sécurité)
+3. **Base de données PostgreSQL embarquée** (avec initialisation et migration automatiques)
+
+Le tout s'exécute dans **un seul et unique conteneur Docker** !
 
 ---
 
-## 🌟 Avantages
-* **1 seul Web Service Render** (gratuit ou 7$/mois, pas besoin de payer 2 instances).
+## 🌟 Avantages de l'Architecture Tout-en-Un
+* **100% Gratuit sur Render** : Pas besoin de créer un service PostgreSQL Render externe (qui expire au bout de 30 jours sur le Free tier).
+* **1 seul Web Service** : Facturation 0$ sans surprise.
 * **0 problème de CORS** : Frontend et API partagent le même domaine HTTPS.
-* **Synchronisation automatique de la base de données** au démarrage (`prisma db push` automatique).
-* **Déploiement en 1 git push** sur GitHub.
+* **Initialisation automatique** : Dès le démarrage du conteneur, PostgreSQL se lance en local, crée la base `minane_db`, pousse le schéma Prisma (`db push`) et initialise les données de test (`seed`).
+* **Flexibilité totale** : Si vous décidez plus tard de brancher une base de données externe (ex: Neon, Supabase, Render DB payante), il suffit de renseigner la variable `DATABASE_URL` et le conteneur l'utilisera automatiquement sans modification de code !
 
 ---
 
@@ -16,45 +22,35 @@ Ce projet est configuré avec un **Dockerfile multi-stage unifié** qui compile 
 
 1. Connectez-vous sur votre compte [Render.com](https://dashboard.render.com).
 2. Cliquez sur **New +** en haut à droite, puis sélectionnez **Blueprint**.
-3. Liez votre dépôt GitHub `miname_cargo`.
+3. Liez votre dépôt GitHub `minane_cargo_app` (ou `minane_cargo`).
 4. Render va détecter automatiquement le fichier `render.yaml` :
-   - Il crée la base de données PostgreSQL `minane-cargo-db`.
    - Il crée le Web Service Docker `minane-cargo-app`.
-   - Il relie automatiquement `DATABASE_URL` et génère un `JWT_SECRET` sécurisé.
+   - Il configure les variables de production automatiquement.
 5. Cliquez sur **Apply**.
-6. En 3 à 5 minutes, votre application est en ligne ! 🎉
+6. En 3 à 5 minutes, votre conteneur est compilé et en ligne ! 🎉
 
 ---
 
-## 🛠️ Méthode 2 : Déploiement Manuel sur Render
+## 🛠️ Méthode 2 : Déploiement Manuel sur Render (Web Service Docker)
 
-Si vous préférez créer les services manuellement depuis l'interface Render :
-
-### Étape 1 : Créer la Base de Données PostgreSQL
-1. Sur Render, cliquez sur **New +** > **PostgreSQL**.
-2. Nom : `minane-db`
-3. Database : `minane_db`
-4. User : `minane_user`
-5. Plan : **Free**
-6. Cliquez sur **Create Database**.
-7. Une fois créée, copiez la valeur **Internal Database URL** (commence par `postgres://...`).
-
-### Étape 2 : Créer le Web Service Docker
-1. Cliquez sur **New +** > **Web Service**.
-2. Liez votre dépôt GitHub `miname_cargo`.
-3. Configuration :
-   - **Name** : `minane-cargo`
-   - **Language** : `Docker`
+1. Sur Render, cliquez sur **New +** > **Web Service**.
+2. Liez votre dépôt GitHub.
+3. Paramètres :
+   - **Name** : `minane-cargo-app`
+   - **Region** : `Frankfurt (EU Central)`
+   - **Branch** : `main`
+   - **Runtime** : `Docker`
    - **Dockerfile Path** : `./Dockerfile`
-   - **Plan** : `Free`
-4. Section **Environment Variables** (cliquez sur "Add Environment Variable") :
-   - `DATABASE_URL` : Collez l'URL PostgreSQL obtenue à l'étape 1.
-   - `JWT_SECRET` : Une chaîne aléatoire d'au moins 32 caractères (ex: `e5dcad11b5260cf9c868cf22d4d932a02561d8e4588c5c035c4a56593bf5b1d9`).
+   - **Instance Type** : `Free`
+4. Section **Environment Variables** :
    - `NODE_ENV` : `production`
+   - `PORT` : `5000`
+   - `JWT_SECRET` : Une chaîne aléatoire sécurisée de 32+ caractères (ex: `e5dcad11b5260cf9c868cf22d4d932a02561d8e4588c5c035c4a56593bf5b1d9`)
    - `ADMIN_EMAIL` : `admin@minanecargo.sn`
    - `ADMIN_PASSWORD` : `AdminMinane2026!`
    - `ADMIN_NAME` : `Gestionnaire Minane Cargo`
-5. Cliquez sur **Create Web Service**.
+5. *(Optionnel - Persistance)* : Si vous disposez d'un plan Render Starter ou supérieur, vous pouvez ajouter un disque persistant de 1 Go monté sur `/var/lib/postgresql/data`.
+6. Cliquez sur **Create Web Service**.
 
 ---
 
@@ -62,5 +58,6 @@ Si vous préférez créer les services manuellement depuis l'interface Render :
 Une fois le déploiement terminé sur Render :
 * **Page d'accueil :** `https://votre-app.onrender.com/` (Landing page avec simulateur CBM, suivi et réassurance).
 * **Santé de l'API :** `https://votre-app.onrender.com/api/health` doit répondre `{"status": "OK"}`.
-* **Espace Administrateur :** Cliquez sur le bouclier 🛡️ ou rendez-vous sur la plateforme et connectez-vous avec 
-
+* **Espace Administrateur :** Cliquez sur le bouton Administrateur (icône cadenas) et connectez-vous avec :
+  - **Email** : `admin@minanecargo.sn`
+  - **Mot de passe** : `AdminMinane2026!`

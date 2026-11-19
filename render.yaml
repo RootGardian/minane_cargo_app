@@ -1,10 +1,12 @@
 # ==============================================================================
-# MINANE CARGO — Render Blueprint (Déploiement Automatisé 1-Clic)
+# MINANE CARGO — Render Blueprint (Déploiement Automatisé Tout-en-Un)
+# Conteneur Unique : Frontend Vite + Backend Express + PostgreSQL Embarqué
+# 100% Gratuit sur Render (Ne nécessite aucun service de base de données externe)
 # ==============================================================================
 version: "1"
 
 services:
-  # ─── Service Web Unique (Frontend Vite + Backend Express via Docker) ──────────
+  # ─── Service Web Unique Tout-en-Un (Front + Back + Base de Données) ───────────
   - type: web
     name: minane-cargo-app
     runtime: docker
@@ -17,10 +19,6 @@ services:
         value: production
       - key: PORT
         value: 5000
-      - key: DATABASE_URL
-        fromDatabase:
-          name: minane-cargo-db
-          property: connectionString
       - key: JWT_SECRET
         generateValue: true
       - key: ADMIN_EMAIL
@@ -29,12 +27,3 @@ services:
         value: AdminMinane2026!
       - key: ADMIN_NAME
         value: Gestionnaire Minane Cargo
-
-databases:
-  # ─── Base de Données PostgreSQL Gérée par Render ─────────────────────────────
-  - name: minane-cargo-db
-    databaseName: minane_db
-    user: minane_user
-    plan: free
-    region: frankfurt
-
