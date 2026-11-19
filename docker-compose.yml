@@ -1,0 +1,29 @@
+# ==============================================================================
+# MINANE CARGO — Docker Compose Tout-en-Un (Production / VPS / Serveur Dédié)
+# Frontend React + Backend Node.js Express + Base PostgreSQL intégrée
+# ==============================================================================
+version: '3.8'
+
+services:
+  minane-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: minane_cargo_app
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=production
+      - PORT=5000
+      - JWT_SECRET=${JWT_SECRET:-minane_secret_jwt_key_2026_change_in_production_xyz123}
+      - ADMIN_EMAIL=${ADMIN_EMAIL:-admin@minanecargo.sn}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-AdminMinane2026!}
+      - ADMIN_NAME=${ADMIN_NAME:-Gestionnaire Minane Cargo}
+    volumes:
+      # Persistance de la base de données PostgreSQL sur le disque du serveur
+      - minane_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  minane_postgres_data:
+    driver: local
