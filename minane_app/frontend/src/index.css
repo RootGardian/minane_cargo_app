@@ -1,0 +1,35 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-white text-[#0B1F33] font-sans antialiased;
+  }
+  ::selection {
+    @apply bg-[#E2001A] text-white;
+  }
+}
+
+@layer components {
+  .btn-cma-navy {
+    @apply px-6 py-3 bg-[#042442] hover:bg-[#083863] text-white text-xs sm:text-sm font-semibold tracking-wider uppercase transition-colors rounded-none inline-flex items-center justify-center gap-2;
+  }
+  .btn-cma-red {
+    @apply px-6 py-3 bg-[#E2001A] hover:bg-[#B8001A] text-white text-xs sm:text-sm font-semibold tracking-wider uppercase transition-colors rounded-none inline-flex items-center justify-center gap-2;
+  }
+  .btn-cma-outline {
+    @apply px-6 py-3 border border-[#042442] text-[#042442] hover:bg-[#042442] hover:text-white text-xs sm:text-sm font-semibold tracking-wider uppercase transition-colors rounded-none inline-flex items-center justify-center gap-2;
+  }
+  .input-cma {
+    @apply w-full px-4 py-3 border border-[#E2E8F0] text-[#0B1F33] text-sm rounded-none focus:outline-none focus:border-[#042442] transition-colors bg-white;
+  }
+  .card-cma {
+    @apply bg-white border border-[#E2E8F0] rounded-none;
+  }
+}

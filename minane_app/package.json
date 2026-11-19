@@ -1,0 +1,15 @@
+{
+  "name": "minane-app-root",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Application Métier Minane Cargo (Chine -> Sénégal)",
+  "scripts": {
+    "start:backend": "cd backend && node src/index.js",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build:frontend": "cd frontend && npm run build",
+    "db:seed": "cd backend && node prisma/seed.js",
+    "db:push": "cd backend && npx prisma db push"
+  }
+}
+

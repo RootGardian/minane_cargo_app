@@ -1,0 +1,143 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model AppSettings {
+  id                   Int       @id @default(1)
+  maritimeCbmRate      Int       @default(165000)
+  airNormalKgRate      Int       @default(8500)
+  airExpressKgRate     Int       @default(11000)
+  nextCutoffDate       DateTime?
+  nextLoadingDate      DateTime?
+  nextEstimatedArrival DateTime?
+  announcementBanner   String?
+  phoneDakar           String    @default("+221 70 596 12 76")
+  phoneGuangzhou       String    @default("+86 137 1104 5051")
+  phoneGuangzhouSn     String    @default("+221 70 596 12 76")
+  addressDakar         String    @default("Dakar")
+  addressGuangzhou     String    @default("Room C12, 3/F Yidong Building, No. 301 Huanshi Zhong Road, Guangzhou")
+  updatedAt            DateTime  @updatedAt
+}
+
+model Admin {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+}
+
+model Client {
+  id           String     @id @default(uuid())
+  fullName     String
+  phone        String     @unique
+  pinHash      String?
+  isWholesaler Boolean    @default(false)
+  address      String?
+  shipments    Shipment[]
+  createdAt    DateTime   @default(now())
+}
+
+model Container {
+  id              String             @id @default(uuid())
+  containerNumber String             @unique
+  sealNumber      String?
+  transportMode   TransportMode      @default(MARITIME_LCL)
+  etd             DateTime?
+  eta             DateTime?
+  status          ShipmentStatus     @default(CHINA_WAREHOUSE)
+  shipments       Shipment[]
+  expenses        ContainerExpense[]
+  createdAt       DateTime           @default(now())
+}
+
+model ContainerExpense {
+  id          String          @id @default(uuid())
+  category    ExpenseCategory
+  label       String?
+  amount      Int
+  createdAt   DateTime        @default(now())
+  containerId String
+  container   Container       @relation(fields: [containerId], references: [id], onDelete: Cascade)
+}
+
+model Shipment {
+  id            String          @id @default(uuid())
+  trackingCode  String          @unique
+  pickupPin     String
+  description   String
+  quantity      Int             @default(1)
+  transportMode TransportMode   @default(MARITIME_LCL)
+  cbm           Float?
+  weight        Float?
+  appliedRate   Int
+  totalAmount   Int
+  status        ShipmentStatus  @default(CHINA_WAREHOUSE)
+  clientId      String
+  client        Client          @relation(fields: [clientId], references: [id])
+  containerId   String?
+  container     Container?      @relation(fields: [containerId], references: [id])
+  payments      Payment[]
+  history       StatusHistory[]
+  createdAt     DateTime        @default(now())
+}
+
+model Payment {
+  id         String        @id @default(uuid())
+  receiptNum String        @unique
+  amount     Int
+  method     PaymentMethod
+  reference  String?
+  paidAt     DateTime      @default(now())
+  shipmentId String
+  shipment   Shipment      @relation(fields: [shipmentId], references: [id])
+}
+
+model StatusHistory {
+  id         String         @id @default(uuid())
+  status     ShipmentStatus
+  note       String?
+  createdAt  DateTime       @default(now())
+  shipmentId String
+  shipment   Shipment       @relation(fields: [shipmentId], references: [id])
+}
+
+enum TransportMode {
+  MARITIME_LCL
+  MARITIME_FCL
+  AIR_NORMAL
+  AIR_EXPRESS
+}
+
+enum PaymentMethod {
+  CASH
+  WAVE
+  ORANGE_MONEY
+  BANK_TRANSFER
+}
+
+enum ExpenseCategory {
+  SEA_FREIGHT
+  PORT_FEES
+  CUSTOMS
+  HANDLING
+  LOCAL_TRANSPORT
+  OTHER
+}
+
+enum ShipmentStatus {
+  CHINA_WAREHOUSE
+  CONTAINER_LOADED
+  TRANSFERRED_TO_PORT
+  IN_TRANSIT
+  ARRIVED_DAKAR
+  CUSTOMS_CLEARANCE
+  READY_FOR_PICKUP
+  DELIVERED
+}
+

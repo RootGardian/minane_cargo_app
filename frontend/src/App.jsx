@@ -29,10 +29,10 @@ function App() {
           {/* Éléments décoratifs (Glassmorphism / Glow) */}
           <div className="absolute -top-10 -right-10 w-48 h-48 bg-[#bd1228] rounded-full opacity-20 blur-3xl transition-transform duration-700 group-hover:scale-110"></div>
           <div className="absolute -bottom-10 right-20 w-32 h-32 bg-[#4a55a2] rounded-full opacity-20 blur-2xl"></div>
-          
+
           <div className="relative z-10">
             <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight flex items-center gap-3">
-              Salut Mamy Yade <span className="animate-wave origin-bottom-right inline-block">👋</span>
+              Salut Mamy Yade <span className="animate-wave origin-bottom-right inline-block"></span>
             </h1>
             <p className="text-slate-300 mt-2 font-medium text-lg">Ravi de te revoir ! Prête à générer de nouvelles factures ?</p>
           </div>

@@ -1,0 +1,36 @@
+# Minane Cargo - Fichiers à ne JAMAIS committer
+# ============================================
+
+# Variables d'environnement (CRITIQUE - contient mots de passe et clés)
+.env
+.env.*
+!.env.example
+
+# Dépendances
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build
+dist/
+build/
+.cache/
+
+# Prisma migrations non revues
+prisma/migrations/*/migration_lock.toml
+
+# Logs
+logs/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
