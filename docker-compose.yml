@@ -1,15 +1,32 @@
 # ==============================================================================
-# MINANE CARGO — Docker Compose Tout-en-Un (Production / VPS / Serveur Dédié)
-# Frontend React + Backend Node.js Express + Base PostgreSQL intégrée
+# MINANE CARGO — Docker Compose Production (Nginx + Application + PostgreSQL)
+# Nginx route automatiquement le trafic vers le conteneur applicatif 'minane_app'
 # ==============================================================================
 version: '3.8'
 
 services:
+  # ─── 1. Reverse Proxy Nginx (Point d'entrée HTTP 80 & HTTPS 443) ─────────────
+  nginx:
+    image: nginx:alpine
+    container_name: minane_nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - minane-app
+    networks:
+      - minane_network
+
+  # ─── 2. Conteneur Front/Back/BDD (Nom DNS interne : minane_app) ─────────────
   minane-app:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: minane_cargo_app
+    container_name: minane_app
     restart: always
     ports:
       - "5000:5000"
@@ -21,9 +38,15 @@ services:
       - ADMIN_PASSWORD=${ADMIN_PASSWORD:-AdminMinane2026!}
       - ADMIN_NAME=${ADMIN_NAME:-Gestionnaire Minane Cargo}
     volumes:
-      # Persistance de la base de données PostgreSQL sur le disque du serveur
+      # Persistance des données PostgreSQL sur le disque hôte
       - minane_postgres_data:/var/lib/postgresql/data
+    networks:
+      - minane_network
 
 volumes:
   minane_postgres_data:
     driver: local
+
+networks:
+  minane_network:
+    driver: bridge
