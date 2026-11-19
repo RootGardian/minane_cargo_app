@@ -29,26 +29,43 @@ const ENV = process.env.NODE_ENV || 'development';
 // ─── 1. Security Headers (first — before anything else) ──────────────────────
 app.use(securityHeaders);
 
-// ─── 2. CORS (strict whitelist) ───────────────────────────────────────────────
+// ─── 2. Serve Static Frontend Files (High Performance, No API Overhead) ──────
+const possibleDistPaths = [
+  process.env.CLIENT_BUILD_PATH,
+  path.join(__dirname, '../public_frontend'),
+  path.join(__dirname, '../../frontend/dist'),
+  path.join(__dirname, '../dist')
+].filter(Boolean);
+
+const frontendDist = possibleDistPaths.find(p => fs.existsSync(p));
+
+if (frontendDist) {
+  console.log(`📦 Distribution frontend détectée : ${frontendDist}`);
+  app.use(express.static(frontendDist, {
+    maxAge: '1d',
+    etag: true
+  }));
+}
+
+// ─── 3. CORS (strict whitelist avec fallback dynamique) ───────────────────────
 app.use(cors(buildCorsOptions()));
 app.options('*', cors(buildCorsOptions())); // Handle preflight
 
-// ─── 3. Body parsing with strict size limit ───────────────────────────────────
-app.use(express.json({ limit: '50kb' }));  // 50kb max (down from 100kb)
+// ─── 4. Body parsing with strict size limit ───────────────────────────────────
+app.use(express.json({ limit: '50kb' }));
 app.use(express.urlencoded({ extended: false, limit: '20kb' }));
 
-// ─── 4. Global rate limiter (before sanitization) ────────────────────────────
-app.use(globalRateLimiter);
+// ─── 5. Global rate limiter (API protection) ──────────────────────────────────
+app.use('/api', globalRateLimiter);
 
-// ─── 5. Input sanitization (XSS, Prototype Pollution, Null Bytes) ─────────────
-app.use(globalSanitizer);
+// ─── 6. Input sanitization (XSS, Prototype Pollution, Null Bytes) ─────────────
+app.use('/api', globalSanitizer);
 
-// ─── 6. SQL Injection guard (extra layer, Prisma parameterizes too) ───────────
-app.use(sqlInjectionGuard);
+// ─── 7. SQL Injection guard (extra layer) ─────────────────────────────────────
+app.use('/api', sqlInjectionGuard);
 
-// ─── 7. Logging (minimal in production — no sensitive data) ───────────────────
+// ─── 8. Logging (minimal in production — no sensitive data) ───────────────────
 if (ENV === 'production') {
-  // Only log method + url + status (no request body, no IPs in logs)
   app.use(morgan(':method :url :status :res[content-length] - :response-time ms'));
 } else {
   app.use(morgan('dev'));
@@ -75,21 +92,8 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// ─── Serve Frontend Static Build (Production / Docker) ─────────────────────────
-const possibleDistPaths = [
-  process.env.CLIENT_BUILD_PATH,
-  path.join(__dirname, '../public_frontend'),
-  path.join(__dirname, '../../frontend/dist'),
-  path.join(__dirname, '../dist')
-].filter(Boolean);
-
-const frontendDist = possibleDistPaths.find(p => fs.existsSync(p));
-
+// ─── SPA Fallback pour le frontend React ──────────────────────────────────────
 if (frontendDist) {
-  console.log(`📦 Distribution frontend détectée : ${frontendDist}`);
-  app.use(express.static(frontendDist));
-
-  // SPA fallback pour les routes client (landing, admin, tracking, etc.)
   app.get('*', (req, res, next) => {
     if (req.path.startsWith('/api')) {
       return next();

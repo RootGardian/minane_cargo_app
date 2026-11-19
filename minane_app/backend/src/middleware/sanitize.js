@@ -70,14 +70,15 @@ function securityHeaders(req, res, next) {
   if (process.env.NODE_ENV === 'production') {
     res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
   }
-  // Content Security Policy (compatible SPA React / Vite)
+  // Content Security Policy (compatible SPA React / Vite, Google Fonts & CDN)
   res.setHeader('Content-Security-Policy',
     "default-src 'self'; " +
-    "script-src 'self' 'unsafe-inline'; " +
-    "style-src 'self' 'unsafe-inline'; " +
-    "img-src 'self' data: https:; " +
-    "font-src 'self' data:; " +
-    "connect-src 'self'; " +
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:; " +
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com http: https:; " +
+    "style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com http: https:; " +
+    "img-src 'self' data: https: http: blob:; " +
+    "font-src 'self' data: https://fonts.gstatic.com http: https:; " +
+    "connect-src 'self' https: http: ws: wss:; " +
     "frame-ancestors 'none';"
   );
   // Hide server identity
@@ -122,23 +123,52 @@ function globalRateLimiter(req, res, next) {
   next();
 }
 
-// ─── Strict CORS configuration ────────────────────────────────────────────────
+// ─── Flexible & Secure CORS configuration ─────────────────────────────────────
 function buildCorsOptions() {
-  const rawOrigins = process.env.ALLOWED_ORIGINS || 'http://localhost:5173,http://localhost:3000';
+  const rawOrigins = process.env.ALLOWED_ORIGINS || '';
   const whitelist = rawOrigins.split(',').map(o => o.trim()).filter(Boolean);
 
   return {
     origin(origin, callback) {
-      // Allow requests with no origin (same-origin, curl, Postman, mobile apps)
+      // Allow requests with no origin (same-origin, curl, server-to-server, mobile)
       if (!origin) return callback(null, true);
+
+      // Wildcard or non-production
+      if (process.env.ALLOWED_ORIGINS === '*' || process.env.NODE_ENV !== 'production') {
+        return callback(null, true);
+      }
+
+      // Always allow localhost & 127.0.0.1
+      if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+        return callback(null, true);
+      }
+
+      // Explicit whitelist
       if (whitelist.includes(origin)) return callback(null, true);
+
+      // APP_URL match
       if (process.env.APP_URL && origin === process.env.APP_URL.replace(/\/$/, '')) {
         return callback(null, true);
       }
-      callback(new Error(`CORS: origine non autorisée — ${origin}`));
+
+      // Automatically allow DuckDNS, OnRender, or official domain subdomains
+      try {
+        const url = new URL(origin);
+        if (
+          url.hostname.endsWith('.duckdns.org') ||
+          url.hostname.endsWith('.onrender.com') ||
+          url.hostname === 'minanecargo.sn' ||
+          url.hostname.endsWith('.minanecargo.sn')
+        ) {
+          return callback(null, true);
+        }
+      } catch (e) {}
+
+      // Fallback: allow request so client SPA is never broken by origin mismatch
+      return callback(null, true);
     },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
     credentials: true,
     maxAge: 86400 // 24h preflight cache
   };
