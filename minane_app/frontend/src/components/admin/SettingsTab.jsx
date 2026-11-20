@@ -1,10 +1,36 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { api } from '../../services/api';
 
 export default function SettingsTab({
   settingsForm,
   setSettingsForm,
-  onSaveSettings
+  onSaveSettings,
+  onDataReset
 }) {
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [resetInput, setResetInput] = useState('');
+  const [resetLoading, setResetLoading] = useState(false);
+  const [resetError, setResetError] = useState('');
+
+  async function handleReset() {
+    if (resetInput !== 'VIDER LA BASE') {
+      setResetError('Phrase incorrecte. Tapez exactement : VIDER LA BASE');
+      return;
+    }
+    setResetLoading(true);
+    setResetError('');
+    try {
+      await api.resetDatabase('VIDER LA BASE');
+      setShowResetModal(false);
+      setResetInput('');
+      if (onDataReset) onDataReset();
+      alert('✅ Base de données vidée avec succès. Tous les colis, conteneurs et règlements ont été supprimés.');
+    } catch (err) {
+      setResetError(err.message || 'Erreur lors de la réinitialisation.');
+    } finally {
+      setResetLoading(false);
+    }
+  }
   if (!settingsForm) return null;
 
   return (
@@ -170,6 +196,80 @@ export default function SettingsTab({
           Enregistrer les Nouveaux Paramètres
         </button>
       </form>
+
+      {/* ─── Zone Dangereuse ──────────────────────────────────────────── */}
+      <div className="border-t-2 border-red-200 pt-6 mt-4">
+        <h3 className="text-sm font-bold text-red-700 uppercase tracking-wider mb-1 flex items-center gap-2">
+          <span>⚠️</span> Zone Dangereuse — Réinitialisation des Données
+        </h3>
+        <p className="text-xs text-slate-500 mb-4">
+          Cette action supprime <strong>définitivement</strong> tous les colis, conteneurs, règlements et clients de la base de données.
+          Les paramètres et le compte administrateur sont conservés. <strong>Cette action est irréversible.</strong>
+        </p>
+        <button
+          type="button"
+          onClick={() => { setShowResetModal(true); setResetInput(''); setResetError(''); }}
+          className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white text-xs font-bold uppercase tracking-wider transition rounded-none"
+        >
+          🗑️ Vider toutes les données opérationnelles
+        </button>
+      </div>
+
+      {/* ─── Modale de confirmation Reset ────────────────────────────── */}
+      {showResetModal && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+          <div className="bg-white w-full max-w-md shadow-2xl">
+            <div className="bg-red-600 px-6 py-4">
+              <h3 className="text-white font-bold text-sm uppercase tracking-wider">
+                ⚠️ Confirmation — Vider la base de données
+              </h3>
+            </div>
+            <div className="p-6 space-y-4">
+              <p className="text-sm text-slate-700">
+                Vous êtes sur le point de <strong className="text-red-600">supprimer définitivement</strong> :
+              </p>
+              <ul className="text-xs text-slate-600 list-disc list-inside space-y-1 bg-red-50 border border-red-200 p-3">
+                <li>Tous les colis & expéditions</li>
+                <li>Tous les conteneurs & frais P&L</li>
+                <li>Tous les règlements & quittances</li>
+                <li>Tous les historiques de statut</li>
+                <li>Tous les clients enregistrés</li>
+              </ul>
+              <p className="text-xs text-slate-600">
+                Pour confirmer, tapez exactement : <strong className="font-mono text-red-700">VIDER LA BASE</strong>
+              </p>
+              <input
+                type="text"
+                value={resetInput}
+                onChange={(e) => setResetInput(e.target.value)}
+                placeholder="VIDER LA BASE"
+                className="w-full px-4 py-2.5 border-2 border-red-300 font-mono text-sm focus:outline-none focus:border-red-600 rounded-none"
+                autoFocus
+              />
+              {resetError && (
+                <p className="text-xs text-red-600 font-semibold">{resetError}</p>
+              )}
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowResetModal(false)}
+                  className="flex-1 px-4 py-2.5 border border-slate-300 text-slate-700 text-xs font-bold uppercase hover:bg-slate-50 transition rounded-none"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="button"
+                  onClick={handleReset}
+                  disabled={resetLoading || resetInput !== 'VIDER LA BASE'}
+                  className="flex-1 px-4 py-2.5 bg-red-600 text-white text-xs font-bold uppercase hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition rounded-none"
+                >
+                  {resetLoading ? 'Suppression...' : '🗑️ Confirmer la suppression'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

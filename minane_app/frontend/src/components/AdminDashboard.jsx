@@ -338,6 +338,13 @@ export default function AdminDashboard({ adminUser, onLogout }) {
           settingsForm={settingsForm}
           setSettingsForm={setSettingsForm}
           onSaveSettings={handleSaveSettings}
+          onDataReset={() => {
+            setShipments([]);
+            setContainers([]);
+            setClients([]);
+            setReceivables({ totalGlobalDebt: 0, receivables: [] });
+            setRecentPayments([]);
+          }}
         />
       )}
 

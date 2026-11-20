@@ -77,6 +77,9 @@ export const api = {
   updateClient: (id, payload) => request(`/clients/${id}`, { method: 'PUT', body: JSON.stringify(payload) }, 'admin'),
 
   // Admin Settings
-  updateSettings: (payload) => request('/settings', { method: 'PUT', body: JSON.stringify(payload) }, 'admin')
+  updateSettings: (payload) => request('/settings', { method: 'PUT', body: JSON.stringify(payload) }, 'admin'),
+
+  // Admin — Zone Dangereuse
+  resetDatabase: (confirmPhrase) => request('/admin/reset-data', { method: 'DELETE', body: JSON.stringify({ confirmPhrase }) }, 'admin')
 };
 
