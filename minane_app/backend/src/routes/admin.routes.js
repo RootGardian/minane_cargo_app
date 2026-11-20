@@ -8,3 +8,4 @@ const adminController = require('../controllers/admin.controller');
 router.delete('/reset-data', authAdmin, adminController.resetData);
 
 module.exports = router;
+

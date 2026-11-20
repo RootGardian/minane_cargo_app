@@ -1,10 +1,3 @@
-# ==============================================================================
-# MINANE CARGO — Docker Compose Tout-en-Un (Production VPS)
-# Frontend React + Backend Node.js Express + Base PostgreSQL intégrée
-# S'intègre directement avec le Nginx existant de votre VPS sur le port 5000
-# ==============================================================================
-version: '3.8'
-
 services:
   minane-cargo:
     build:
@@ -12,19 +5,28 @@ services:
       dockerfile: Dockerfile
     container_name: minane_cargo
     restart: always
-    ports:
-      - "5000:5000"
+    expose:
+      - "5000"
     environment:
       - NODE_ENV=production
       - PORT=5000
-      - JWT_SECRET=${JWT_SECRET:-minane_secret_jwt_key_2026_change_in_production_xyz123}
+      - VIRTUAL_HOST=${VIRTUAL_HOST:-minane-cargo-app.blackcoretech.duckdns.org}
+      - VIRTUAL_PORT=5000
+      - LETSENCRYPT_HOST=${LETSENCRYPT_HOST:-minane-cargo-app.blackcoretech.duckdns.org}
+      - JWT_SECRET=${JWT_SECRET:-minane_secret_jwt_key_2026_odhbilunnlqbheçtumbqnqçuib}
       - ADMIN_EMAIL=${ADMIN_EMAIL:-admin@minanecargo.sn}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD:-AdminMinane2026!}
       - ADMIN_NAME=${ADMIN_NAME:-Gestionnaire Minane Cargo}
     volumes:
-      # Persistance des données de la base PostgreSQL sur le disque du VPS
       - minane_postgres_data:/var/lib/postgresql/data
+    networks:
+      - default
+      - proxy-net
 
 volumes:
   minane_postgres_data:
     driver: local
+
+networks:
+  proxy-net:
+    external: true
