@@ -50,8 +50,8 @@ function formatTransportMode(mode) {
   switch (mode) {
     case 'MARITIME_LCL': return 'Maritime — Groupage (LCL)';
     case 'MARITIME_FCL': return 'Maritime — Conteneur Complet (FCL)';
-    case 'AIR_NORMAL': return 'Fret Aérien — Groupage Standard (7-10j)';
-    case 'AIR_EXPRESS': return 'Fret Aérien — Express (3-5j)';
+    case 'AIR_NORMAL': return 'Fret Aérien Régulier (au Kg)';
+    case 'AIR_EXPRESS': return 'Fret Aérien Régulier (au Kg)';
     default: return 'Fret Commercial';
   }
 }

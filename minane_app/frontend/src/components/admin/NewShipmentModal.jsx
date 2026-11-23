@@ -113,10 +113,9 @@ export default function NewShipmentModal({
                   onChange={(e) => setNewShipment({ ...newShipment, transportMode: e.target.value })}
                   className="w-full px-3 py-2 border border-slate-300 text-xs font-semibold bg-white rounded-none"
                 >
-                  <option value="MARITIME_LCL">🚢 Maritime Groupage (LCL)</option>
-                  <option value="MARITIME_FCL">🚢 Maritime Conteneur Plein</option>
-                  <option value="AIR_NORMAL">✈️ Aérien — Groupage Standard (7-10j / Kg)</option>
-                  <option value="AIR_EXPRESS">⚡ Aérien — Express (3-5j / Kg)</option>
+                  <option value="MARITIME_LCL">🚢 Maritime Groupage (LCL / CBM)</option>
+                  <option value="MARITIME_FCL">🚢 Maritime Conteneur Plein (FCL)</option>
+                  <option value="AIR_NORMAL">✈️ Fret Aérien Régulier (au Kg)</option>
                 </select>
               </div>
 
@@ -186,24 +185,22 @@ export default function NewShipmentModal({
               ★ CALCUL TARIFAIRE AUTOMATIQUE & OVERRIDE VIP
             </span>
             <p className="text-[11px] text-slate-600">
-              {newShipment.transportMode?.startsWith('AIR')
-                ? `Tarif Aérien actif : ${newShipment.transportMode === 'AIR_EXPRESS' ? (settings?.airExpressKgRate || 11000) : (settings?.airNormalKgRate || 8500)} FCFA / Kg.`
+              {newShipment.transportMode === 'AIR_NORMAL'
+                ? `Tarif Aérien actif : ${settings?.airNormalKgRate || 8500} FCFA / Kg.`
                 : `Tarif Maritime actif : ${settings?.maritimeCbmRate || 165000} FCFA / CBM.`
               }
-              {' '}Vous pouvez écraser manuellement le tarif ou le montant pour un client VIP.
+              {' '}Vous pouvez écraser manuellement le tarif unitaire ou le montant total pour un client VIP.
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
               <div>
                 <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                  Tarif Unitaire Personnalisé (FCFA / {newShipment.transportMode?.startsWith('AIR') ? 'Kg' : 'CBM'})
+                  Tarif Unitaire Personnalisé (FCFA / {newShipment.transportMode === 'AIR_NORMAL' ? 'Kg' : 'CBM'})
                 </label>
                 <input
                   type="number"
                   placeholder={
-                    newShipment.transportMode === 'AIR_EXPRESS'
-                      ? `Défaut : ${settings?.airExpressKgRate || 11000} FCFA/Kg`
-                      : newShipment.transportMode === 'AIR_NORMAL'
+                    newShipment.transportMode === 'AIR_NORMAL'
                       ? `Défaut : ${settings?.airNormalKgRate || 8500} FCFA/Kg`
                       : `Défaut : ${settings?.maritimeCbmRate || 165000} FCFA/CBM`
                   }

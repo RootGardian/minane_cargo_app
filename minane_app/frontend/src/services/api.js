@@ -1,8 +1,15 @@
 const API_BASE = '/api';
 
-export const getAdminToken = () => localStorage.getItem('minane_admin_token');
-export const setAdminToken = (token) => localStorage.setItem('minane_admin_token', token);
-export const removeAdminToken = () => localStorage.removeItem('minane_admin_token');
+export const getAdminToken = () => sessionStorage.getItem('minane_admin_token') || localStorage.getItem('minane_admin_token');
+export const setAdminToken = (token) => {
+  sessionStorage.setItem('minane_admin_token', token);
+  localStorage.removeItem('minane_admin_token');
+};
+export const removeAdminToken = () => {
+  sessionStorage.removeItem('minane_admin_token');
+  localStorage.removeItem('minane_admin_token');
+  sessionStorage.removeItem('minane_current_view');
+};
 
 export const getWholesalerToken = () => localStorage.getItem('minane_wholesaler_token');
 export const setWholesalerToken = (token) => localStorage.setItem('minane_wholesaler_token', token);

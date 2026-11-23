@@ -4,6 +4,7 @@ import {
   Container,
   Truck,
   Ship,
+  Plane,
   Anchor,
   FileCheck,
   CheckCircle2,
@@ -11,19 +12,21 @@ import {
   Check
 } from 'lucide-react';
 
-const STATUS_CONFIG = [
-  { key: 'CHINA_WAREHOUSE', label: 'Entrepôt Chine', desc: 'Guangzhou', icon: Building2 },
-  { key: 'CONTAINER_LOADED', label: 'Empotage', desc: 'Conteneur scellé', icon: Container },
-  { key: 'TRANSFERRED_TO_PORT', label: 'Port Chine', desc: 'Port de Nansha', icon: Truck },
-  { key: 'IN_TRANSIT', label: 'En Mer', desc: 'En cours de navigation', icon: Ship },
-  { key: 'ARRIVED_DAKAR', label: 'Arrivé Dakar', desc: 'Dakar', icon: Anchor },
-  { key: 'CUSTOMS_CLEARANCE', label: 'Dédouanement', desc: 'Formalités douanières', icon: FileCheck },
-  { key: 'READY_FOR_PICKUP', label: 'Disponible Dépôt', desc: 'Retrait Dakar', icon: CheckCircle2 },
-  { key: 'DELIVERED', label: 'Colis Livré', desc: 'Remis au destinataire', icon: PackageCheck }
-];
+export default function TrackingTimeline({ currentStatus, history = [], transportMode = 'MARITIME_LCL' }) {
+  const isAir = transportMode?.startsWith('AIR');
 
-export default function TrackingTimeline({ currentStatus, history = [] }) {
-  const currentIndex = STATUS_CONFIG.findIndex(s => s.key === currentStatus);
+  const statusConfig = [
+    { key: 'CHINA_WAREHOUSE', label: 'Entrepôt Chine', desc: 'Guangzhou', icon: Building2 },
+    { key: 'CONTAINER_LOADED', label: isAir ? 'Préparation Vol' : 'Empotage', desc: isAir ? 'Lot Aérien prêt' : 'Conteneur scellé', icon: isAir ? Plane : Container },
+    { key: 'TRANSFERRED_TO_PORT', label: isAir ? 'Aéroport Chine' : 'Port Chine', desc: isAir ? 'Guangzhou CAN' : 'Port de Nansha', icon: isAir ? Plane : Truck },
+    { key: 'IN_TRANSIT', label: isAir ? 'En Vol' : 'En Mer', desc: isAir ? 'Vol Cargo vers Dakar' : 'En navigation', icon: isAir ? Plane : Ship },
+    { key: 'ARRIVED_DAKAR', label: 'Arrivé Dakar', desc: isAir ? 'Aéroport AIBD' : 'Port de Dakar', icon: isAir ? Plane : Anchor },
+    { key: 'CUSTOMS_CLEARANCE', label: 'Dédouanement', desc: 'Formalités douanières', icon: FileCheck },
+    { key: 'READY_FOR_PICKUP', label: 'Disponible Dépôt', desc: 'Retrait Dakar', icon: CheckCircle2 },
+    { key: 'DELIVERED', label: 'Colis Livré', desc: 'Remis au destinataire', icon: PackageCheck }
+  ];
+
+  const currentIndex = statusConfig.findIndex(s => s.key === currentStatus);
 
   return (
     <div className="py-6">
@@ -39,14 +42,13 @@ export default function TrackingTimeline({ currentStatus, history = [] }) {
           <div
             className="absolute left-6 top-5 h-0.5 bg-[#E2001A] transition-all duration-700 -z-0"
             style={{
-              width: currentIndex >= 0 ? `${(currentIndex / (STATUS_CONFIG.length - 1)) * 100}%` : '0%'
+              width: currentIndex >= 0 ? `${(currentIndex / (statusConfig.length - 1)) * 100}%` : '0%'
             }}
           />
 
-          {STATUS_CONFIG.map((step, idx) => {
+          {statusConfig.map((step, idx) => {
             const isCompleted = idx < currentIndex;
             const isCurrent = idx === currentIndex;
-            const isPending = idx > currentIndex;
             const StepIcon = step.icon;
 
             return (
@@ -95,7 +97,7 @@ export default function TrackingTimeline({ currentStatus, history = [] }) {
 
       {/* Mobile Vertical Stepper */}
       <div className="lg:hidden space-y-4">
-        {STATUS_CONFIG.map((step, idx) => {
+        {statusConfig.map((step, idx) => {
           const isCompleted = idx < currentIndex;
           const isCurrent = idx === currentIndex;
           const StepIcon = step.icon;
@@ -111,7 +113,7 @@ export default function TrackingTimeline({ currentStatus, history = [] }) {
                   }`}>
                   {isCompleted ? <Check className="w-4 h-4" /> : <StepIcon className="w-3.5 h-3.5" />}
                 </div>
-                {idx < STATUS_CONFIG.length - 1 && (
+                {idx < statusConfig.length - 1 && (
                   <div className={`w-0.5 h-6 ${idx < currentIndex ? 'bg-[#E2001A]' : 'bg-slate-200'}`} />
                 )}
               </div>

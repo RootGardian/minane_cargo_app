@@ -50,7 +50,9 @@ export default function TrackingModal({ shipment, onClose }) {
                   {shipment.trackingCode}
                 </h3>
                 <span className="text-[11px] px-2 py-0.5 bg-[#E2001A] text-white font-bold uppercase tracking-wider">
-                  {shipment.shippingMode?.replace('_', ' ')}
+                  {(shipment.shippingMode || shipment.transportMode)?.startsWith('AIR')
+                    ? '✈️ FRET AÉRIEN RÉGULIER'
+                    : '🚢 FRET MARITIME'}
                 </span>
               </div>
             </div>
@@ -75,6 +77,7 @@ export default function TrackingModal({ shipment, onClose }) {
             <TrackingTimeline
               currentStatus={shipment.status}
               history={shipment.statusHistory || []}
+              transportMode={shipment.shippingMode || shipment.transportMode}
             />
           </div>
 
@@ -130,19 +133,25 @@ export default function TrackingModal({ shipment, onClose }) {
                   <span className="font-bold text-[#042442]">{shipment.client?.phone || 'N/A'}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block">Volume / Poids :</span>
+                  <span className="text-slate-400 block">
+                    {(shipment.shippingMode || shipment.transportMode)?.startsWith('AIR') ? 'Poids facturable :' : 'Volume CBM :'}
+                  </span>
                   <span className="font-bold text-[#042442]">
-                    {shipment.cbm ? `${shipment.cbm.toFixed(3)} CBM` : `${shipment.weight || 0} Kg`}
+                    {(shipment.shippingMode || shipment.transportMode)?.startsWith('AIR')
+                      ? `${shipment.weight || 0} Kg`
+                      : (shipment.cbm ? `${shipment.cbm.toFixed(3)} CBM` : `${shipment.weight || 0} Kg`)}
                   </span>
                 </div>
                 <div>
                   <span className="text-slate-400 block">Nombre de cartons :</span>
-                  <span className="font-bold text-[#042442]">{shipment.packageCount || 1}</span>
+                  <span className="font-bold text-[#042442]">{shipment.packageCount || shipment.quantity || 1}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block">Conteneur :</span>
+                  <span className="text-slate-400 block">
+                    {(shipment.shippingMode || shipment.transportMode)?.startsWith('AIR') ? 'Vol / Expédition :' : 'Conteneur :'}
+                  </span>
                   <span className="font-bold text-[#042442] font-mono">
-                    {shipment.container?.containerNumber || 'En attente groupage'}
+                    {shipment.container?.containerNumber || ((shipment.shippingMode || shipment.transportMode)?.startsWith('AIR') ? 'Vol Régulier Guangzhou CAN' : 'En attente groupage')}
                   </span>
                 </div>
                 <div>

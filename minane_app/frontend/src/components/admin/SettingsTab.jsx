@@ -109,18 +109,18 @@ export default function SettingsTab({
           </div>
         </div>
 
-        {/* Section Fret Aérien : Tarifs au Kg & Vols Fixes */}
+        {/* Section Fret Aérien : Tarif Fixe au Kg & Dates de Vol */}
         <div className="bg-[#FFF9F9] p-4 border border-rose-200">
           <div className="flex items-center gap-2 mb-3">
             <span className="text-base">✈️</span>
             <h3 className="text-xs font-bold text-[#E2001A] uppercase tracking-wider">
-              Groupage Aérien Express & Standard (Guangzhou CAN ➔ Dakar AIBD)
+              Fret Aérien Régulier (Guangzhou CAN ➔ Dakar AIBD)
             </h3>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
             <div>
               <label className="block text-xs font-bold text-[#042442] uppercase mb-1">
-                Tarif Aérien Standard (FCFA / Kg) — 7 à 10 jours
+                Tarif Fret Aérien Fixe (FCFA / Kg)
               </label>
               <input
                 type="number"
@@ -129,22 +129,7 @@ export default function SettingsTab({
                 className="w-full px-4 py-2.5 border border-slate-300 font-bold text-[#042442] rounded-none focus:outline-none focus:border-[#E2001A] bg-white"
               />
               <p className="text-[11px] text-slate-500 mt-1">
-                Prix fixe par kilogramme pour le groupage cargo régulier.
-              </p>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-[#042442] uppercase mb-1">
-                Tarif Aérien Express (FCFA / Kg) — 3 à 5 jours
-              </label>
-              <input
-                type="number"
-                value={settingsForm.airExpressKgRate || 11000}
-                onChange={(e) => setSettingsForm({ ...settingsForm, airExpressKgRate: e.target.value })}
-                className="w-full px-4 py-2.5 border border-slate-300 font-bold text-[#042442] rounded-none focus:outline-none focus:border-[#E2001A] bg-white"
-              />
-              <p className="text-[11px] text-slate-500 mt-1">
-                Prix fixe par kilogramme pour expédition ultra-rapide par avion.
+                Prix fixe par kilogramme appliqué automatiquement à toute expédition aérienne dédouanée.
               </p>
             </div>
           </div>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowUpRight, Plane, Ship, Clock } from 'lucide-react';
+import { ArrowUpRight, Plane, Ship, ShieldCheck } from 'lucide-react';
 
 const formatDisplayDate = (dateVal) => {
   if (!dateVal) return '25/11/26';
@@ -23,12 +23,11 @@ export default function NextDeparturesCard({ settings }) {
 
   const airCutoff = formatDisplayDate(settings?.nextAirCutoffDate) || 'Jeudi 18h';
   const airDeparture = formatDisplayDate(settings?.nextAirDepartureDate) || 'Samedi';
-  const airArrival = formatDisplayDate(settings?.nextAirArrivalDate) || 'Mercredi (AIBD)';
+  const airArrival = formatDisplayDate(settings?.nextAirArrivalDate) || 'Semaine suivante';
 
   const formatFCFA = (val) => new Intl.NumberFormat('fr-FR').format(val || 0) + ' FCFA';
   const seaRate = settings?.maritimeCbmRate || 165000;
-  const airNormalRate = settings?.airNormalKgRate || 8500;
-  const airExpressRate = settings?.airExpressKgRate || 11000;
+  const airRate = settings?.airNormalKgRate || 8500;
 
   return (
     <section id="actualites" className="bg-[#F4F6F9] py-16 sm:py-24 border-b border-[#E2E8F0]">
@@ -41,7 +40,7 @@ export default function NextDeparturesCard({ settings }) {
               Actualités & Prochains Départs Fixes (Maritime & Aérien)
             </h2>
             <p className="text-sm text-[#475569] mt-1">
-              Bulletins d'empotage maritime, rotations aériennes hebdomadaires et avis tarifaires
+              Bulletins d'empotage maritime, rotations aériennes et avis tarifaires
             </p>
           </div>
           <a
@@ -79,21 +78,21 @@ export default function NextDeparturesCard({ settings }) {
                   </span>
                   <span className="text-xs text-slate-300">|</span>
                   <span className="text-xs font-bold text-sky-700 tracking-wider font-mono flex items-center gap-1">
-                    <Plane className="w-3.5 h-3.5" /> VOLS FIXES AÉRIENS : {airDeparture}
+                    <Plane className="w-3.5 h-3.5" /> VOL FIXE AÉRIEN : {airDeparture}
                   </span>
                 </div>
                 <h3 className="text-xl sm:text-2xl font-bold text-[#042442] mt-2 group-hover:text-[#E2001A] transition leading-snug">
-                  Corridor Sécurisé Guangzhou ➔ Dakar : Deux modes d'expédition réguliers
+                  Corridor Sécurisé Guangzhou ➔ Dakar : Départs réguliers avec numéro de suivi
                 </h3>
                 <p className="text-sm text-[#475569] mt-3 leading-relaxed">
                   <strong>Maritime Groupage (LCL) :</strong> Clôture dépôt au {cutoffDate} pour arrivée port de Dakar le {arrivalDate} à {formatFCFA(seaRate)} / CBM.<br />
-                  <strong>Fret Aérien Régulier :</strong> Départs hebdomadaires fixes chaque {airDeparture} (clôture {airCutoff}) avec livraison AIBD dès le {airArrival} à partir de {formatFCFA(airNormalRate)} / Kg.
+                  <strong>Fret Aérien Régulier :</strong> Départs hebdomadaires fixes le {airDeparture} (clôture {airCutoff}) avec arrivée AIBD le {airArrival} à {formatFCFA(airRate)} / Kg.
                 </p>
               </div>
 
               <div className="pt-6 border-t border-[#E2E8F0] flex items-center justify-between text-xs">
                 <span className="font-semibold text-slate-500 flex items-center gap-1">
-                  <Clock className="w-3.5 h-3.5 text-emerald-600" /> Départs et escales garantis sans retard
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" /> Suivi de bout en bout dès l'attribution du code d'expédition
                 </span>
                 <span className="text-[#E2001A] font-bold inline-flex items-center gap-1 group-hover:underline uppercase tracking-wider">
                   <ArrowUpRight className="w-4 h-4" />
@@ -134,23 +133,23 @@ export default function NextDeparturesCard({ settings }) {
                 Rotation Cargo Aérien Guangzhou CAN ➔ Dakar AIBD
               </h4>
               <p className="text-xs text-[#475569] mt-1">
-                Clôture de pesée le <strong>{airCutoff}</strong>. Standard : {formatFCFA(airNormalRate)}/kg (7-10j) | Express : {formatFCFA(airExpressRate)}/kg (3-5j).
+                Clôture de pesée le <strong>{airCutoff}</strong>. Tarif fixe dédouané : <strong>{formatFCFA(airRate)} / Kg</strong>.
               </p>
             </div>
 
-            {/* Item 3: Guichet Sandaga */}
+            {/* Item 3: Guichet Sandaga & Suivi */}
             <div className="pb-2 group cursor-pointer">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-slate-600 font-mono tracking-wider">
-                  DÉDOUANEMENT & RETRAIT DAKAR
+                  PORTAIL DE SUIVI & RETRAIT SÉCURISÉ
                 </span>
                 <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-[#E2001A] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition" />
               </div>
               <h4 className="text-base font-bold text-[#042442] mt-1 group-hover:text-[#E2001A] transition underline underline-offset-2">
-                Guichet centralisé à Dakar : Retrait sécurisé par code PIN
+                Suivi complet en ligne dès remise du code de suivi
               </h4>
               <p className="text-xs text-[#475569] mt-1">
-                Toutes les formalités douanières sont gérées par nos transitaires agréés. Règlement sur place (Wave, OM, Espèces).
+                Les clients visualisent toutes les étapes, factures et code PIN dès la communication de leur numéro de suivi MNC.
               </p>
             </div>
 

@@ -19,7 +19,18 @@ import { api, getAdminToken, removeAdminToken } from './services/api';
 
 export default function App() {
   // Views: landing | admin | plan-du-site | confidentialite | mentions-legales | support
-  const [currentView, setCurrentView] = useState('landing');
+  const getInitialView = () => {
+    if (typeof window !== 'undefined') {
+      if (window.location.hash === '#admin') return 'admin';
+      const saved = sessionStorage.getItem('minane_current_view');
+      if (saved && ['admin', 'plan-du-site', 'confidentialite', 'mentions-legales', 'support'].includes(saved)) {
+        return saved;
+      }
+    }
+    return 'landing';
+  };
+
+  const [currentView, setCurrentView] = useState(getInitialView);
   const [settings, setSettings] = useState(null);
   const [trackedShipment, setTrackedShipment] = useState(null);
   const [trackingLoading, setTrackingLoading] = useState(false);
@@ -30,6 +41,28 @@ export default function App() {
 
   // Authenticated admin
   const [adminUser, setAdminUser] = useState(null);
+
+  const handleNavigate = (view) => {
+    setCurrentView(view);
+    try {
+      sessionStorage.setItem('minane_current_view', view);
+      if (view === 'admin') {
+        window.location.hash = 'admin';
+      } else if (window.location.hash === '#admin') {
+        history.replaceState(null, '', window.location.pathname + window.location.search);
+      }
+    } catch (e) {
+      // ignore storage errors
+    }
+  };
+
+  const handleOpenAdminPortal = () => {
+    if (adminUser) {
+      handleNavigate('admin');
+    } else {
+      setIsAdminLoginOpen(true);
+    }
+  };
 
   // Scroll to top on view change
   useEffect(() => {
@@ -45,10 +78,28 @@ export default function App() {
 
     // 2. Check admin token
     const adminToken = getAdminToken();
+    const isTargetingAdmin = typeof window !== 'undefined' && (
+      window.location.hash === '#admin' || sessionStorage.getItem('minane_current_view') === 'admin'
+    );
+
     if (adminToken) {
       api.getAdminMe()
-        .then(res => setAdminUser(res.admin))
-        .catch(() => removeAdminToken());
+        .then(res => {
+          setAdminUser(res.admin);
+          if (isTargetingAdmin) {
+            handleNavigate('admin');
+          }
+        })
+        .catch(() => {
+          removeAdminToken();
+          setAdminUser(null);
+          if (isTargetingAdmin) {
+            handleNavigate('landing');
+          }
+        });
+    } else if (isTargetingAdmin) {
+      handleNavigate('landing');
+      setIsAdminLoginOpen(true);
     }
 
     // 3. Check URL params for direct tracking: ?track=MNC-XXXX
@@ -58,6 +109,22 @@ export default function App() {
       handleTrack(code);
     }
   }, []);
+
+  // Listen to hash changes (ex: manually entering #admin in URL)
+  useEffect(() => {
+    const handleHashChange = () => {
+      if (window.location.hash === '#admin') {
+        const adminToken = getAdminToken();
+        if (adminToken && adminUser) {
+          handleNavigate('admin');
+        } else {
+          setIsAdminLoginOpen(true);
+        }
+      }
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, [adminUser]);
 
   const handleTrack = async (code) => {
     setTrackingLoading(true);
@@ -78,17 +145,13 @@ export default function App() {
 
   const handleAdminLoginSuccess = (admin) => {
     setAdminUser(admin);
-    setCurrentView('admin');
+    handleNavigate('admin');
   };
 
   const handleLogoutAdmin = () => {
     removeAdminToken();
     setAdminUser(null);
-    setCurrentView('landing');
-  };
-
-  const handleNavigate = (view) => {
-    setCurrentView(view);
+    handleNavigate('landing');
   };
 
   // Static info pages
@@ -99,10 +162,10 @@ export default function App() {
       
       {/* Main Corporate Navbar */}
       <Navbar
-        onOpenAdminLogin={() => setIsAdminLoginOpen(true)}
+        onOpenAdminLogin={handleOpenAdminPortal}
         adminUser={adminUser}
         onLogoutAdmin={handleLogoutAdmin}
-        onNavigateHome={() => setCurrentView('landing')}
+        onNavigateHome={() => handleNavigate('landing')}
         settings={settings}
         currentView={currentView}
       />

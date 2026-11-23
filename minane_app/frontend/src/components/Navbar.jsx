@@ -1,5 +1,5 @@
 import React from 'react';
-import { Shield, LogOut, PhoneCall, Calculator } from 'lucide-react';
+import { PhoneCall, Calculator } from 'lucide-react';
 import { getCompanyInfo, getWaChatUrl } from '../utils/company';
 
 export default function Navbar({
@@ -115,30 +115,6 @@ export default function Navbar({
                 <Calculator className="w-3.5 h-3.5" />
                 <span>Simulateur CBM</span>
               </a>
-            )}
-
-            {/* Admin Back-Office Controls — masqués dans la vue admin */}
-            {!isAdminView && (
-              adminUser ? (
-                <div className="flex items-center gap-2 bg-[#042442] text-white px-3 py-1.5 rounded-none text-xs">
-                  <span className="font-bold tracking-wider">ADMIN</span>
-                  <button
-                    onClick={onLogoutAdmin}
-                    className="text-slate-300 hover:text-white"
-                    title="Déconnexion Admin"
-                  >
-                    <LogOut className="w-3.5 h-3.5 ml-1" />
-                  </button>
-                </div>
-              ) : (
-                <button
-                  onClick={onOpenAdminLogin}
-                  className="p-2 text-slate-400 hover:text-[#042442] hover:bg-slate-100 rounded-none transition"
-                  title="Accès Direction & Caisse (Admin)"
-                >
-                  <Shield className="w-4 h-4" />
-                </button>
-              )
             )}
 
           </div>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calculator, Ship, Plane, Check, ArrowRight, Zap, Calendar } from 'lucide-react';
+import { Calculator, Ship, Plane, Check, ArrowRight, Calendar } from 'lucide-react';
 import { getCompanyInfo, cleanPhoneForWA } from '../utils/company';
 
 const formatFCFA = (val) => new Intl.NumberFormat('fr-FR').format(val || 0) + ' FCFA';
@@ -32,26 +32,24 @@ export default function CbmSimulator({ settings }) {
   const [height, setHeight] = useState('');
   const [cartonCount, setCartonCount] = useState('');
 
-  // Air Inputs (kg)
-  const [airService, setAirService] = useState('AIR_NORMAL'); // 'AIR_NORMAL' | 'AIR_EXPRESS'
+  // Air Inputs (kg) — Vol normal uniquement, pas de délai
   const [airWeight, setAirWeight] = useState('');
   const [airCartonCount, setAirCartonCount] = useState('');
 
   // Active Tariffs from settings or defaults
   const seaRate = settings?.maritimeCbmRate || 165000;
-  const airNormalRate = settings?.airNormalKgRate || 8500;
-  const airExpressRate = settings?.airExpressKgRate || 11000;
+  const airRate = settings?.airNormalKgRate || 8500;
 
   // Flight dates
-  const nextAirCutoff = formatDisplayDate(settings?.nextAirCutoffDate) || 'Chaque Jeudi 18h';
-  const nextAirDeparture = formatDisplayDate(settings?.nextAirDepartureDate) || 'Chaque Samedi';
-  const nextAirArrival = formatDisplayDate(settings?.nextAirArrivalDate) || 'Mercredi suivant (AIBD)';
+  const nextAirCutoff = formatDisplayDate(settings?.nextAirCutoffDate) || 'Jeudi';
+  const nextAirDeparture = formatDisplayDate(settings?.nextAirDepartureDate) || 'Samedi';
+  const nextAirArrival = formatDisplayDate(settings?.nextAirArrivalDate) || 'Semaine suivante';
 
   // Validation
   const hasValidMaritimeInput = Number(length) > 0 && Number(width) > 0 && Number(height) > 0 && Number(cartonCount) > 0;
   const hasValidAirInput = Number(airWeight) > 0;
 
-  // Real-time calculations
+  // Calculations
   const calculateMaritimeResult = () => {
     const singleBoxCbm = (Number(length || 0) * Number(width || 0) * Number(height || 0)) / 1000000;
     const totalCbm = singleBoxCbm * Number(cartonCount || 0);
@@ -65,13 +63,12 @@ export default function CbmSimulator({ settings }) {
   };
 
   const calculateAirResult = () => {
-    const appliedKgRate = airService === 'AIR_EXPRESS' ? airExpressRate : airNormalRate;
-    const totalAmount = Math.round(Number(airWeight || 0) * appliedKgRate);
+    const totalAmount = Math.round(Number(airWeight || 0) * airRate);
     return {
       unit: `${Number(airWeight || 0)} Kg`,
-      rateApplied: `${formatFCFA(appliedKgRate)} / Kg`,
+      rateApplied: `${formatFCFA(airRate)} / Kg`,
       totalAmount,
-      details: `${airService === 'AIR_EXPRESS' ? 'Aérien Express (3-5 jours)' : 'Aérien Standard (7-10 jours)'}${airCartonCount ? ` — ${airCartonCount} colis` : ''}`,
+      details: `Fret Aérien Régulier${airCartonCount ? ` — ${airCartonCount} colis` : ''}`,
     };
   };
 
@@ -87,7 +84,7 @@ export default function CbmSimulator({ settings }) {
         <div className="max-w-3xl mb-8">
           <div className="inline-flex items-center gap-2 text-xs font-bold text-[#E2001A] uppercase tracking-widest mb-2">
             {isMaritime ? <Ship className="w-4 h-4" /> : <Plane className="w-4 h-4" />}
-            {isMaritime ? 'Fret Maritime Groupage (LCL & FCL)' : 'Groupage & Fret Aérien Régulier (Chine ➔ Dakar)'}
+            {isMaritime ? 'Fret Maritime Groupage (LCL & FCL)' : 'Fret Aérien Régulier (Chine ➔ Dakar)'}
           </div>
           <h2 className="text-3xl sm:text-5xl font-light text-[#042442] tracking-tight">
             Simulateur de Fret Chine ➔ {company.addressDakar}
@@ -109,8 +106,7 @@ export default function CbmSimulator({ settings }) {
             }`}
           >
             <Ship className="w-4 h-4" />
-            <span>Fret Maritime Conteneur (au m³ / CBM)</span>
-            <span className="ml-1 text-[10px] px-1.5 py-0.5 rounded bg-white/20">35-40 jours</span>
+            <span>Fret Maritime (au m³ / CBM)</span>
           </button>
 
           <button
@@ -123,8 +119,7 @@ export default function CbmSimulator({ settings }) {
             }`}
           >
             <Plane className="w-4 h-4" />
-            <span>Groupage Aérien Express & Standard (au Kg)</span>
-            <span className="ml-1 text-[10px] px-1.5 py-0.5 rounded bg-white/20">3-10 jours</span>
+            <span>Fret Aérien (au Kg)</span>
           </button>
         </div>
 
@@ -222,7 +217,7 @@ export default function CbmSimulator({ settings }) {
                 <div className="flex items-center justify-between border-b border-slate-200 pb-3">
                   <span className="text-xs font-bold text-[#E2001A] uppercase tracking-wider flex items-center gap-2">
                     <Plane className="w-4 h-4" />
-                    Groupage Aérien : Prix Fixe au Kilogramme
+                    Fret Aérien : Prix Fixe au Kilogramme
                   </span>
                   {airWeight && (
                     <button
@@ -236,48 +231,6 @@ export default function CbmSimulator({ settings }) {
                       Effacer tout ✕
                     </button>
                   )}
-                </div>
-
-                {/* Air Service Choice */}
-                <div>
-                  <label className="block text-xs font-bold text-[#042442] uppercase tracking-wider mb-2">
-                    Formule Aérienne Souhaitée
-                  </label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <button
-                      type="button"
-                      onClick={() => setAirService('AIR_NORMAL')}
-                      className={`p-3 text-left border transition ${
-                        airService === 'AIR_NORMAL'
-                          ? 'border-[#042442] bg-white ring-2 ring-[#042442]'
-                          : 'border-slate-300 bg-white hover:border-slate-400'
-                      }`}
-                    >
-                      <div className="font-bold text-xs text-[#042442] flex items-center justify-between">
-                        <span>✈️ Standard Cargo</span>
-                        <span className="text-[#E2001A]">{formatFCFA(airNormalRate)} / Kg</span>
-                      </div>
-                      <div className="text-[11px] text-slate-500 mt-1">Délai : 7 à 10 jours ouvrés</div>
-                      <div className="text-[10px] text-slate-400 mt-0.5">Vols réguliers hebdomadaires</div>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setAirService('AIR_EXPRESS')}
-                      className={`p-3 text-left border transition ${
-                        airService === 'AIR_EXPRESS'
-                          ? 'border-[#E2001A] bg-white ring-2 ring-[#E2001A]'
-                          : 'border-slate-300 bg-white hover:border-slate-400'
-                      }`}
-                    >
-                      <div className="font-bold text-xs text-[#042442] flex items-center justify-between">
-                        <span className="flex items-center gap-1"><Zap className="w-3.5 h-3.5 text-amber-500 fill-amber-500" /> Express Prioritaire</span>
-                        <span className="text-[#E2001A]">{formatFCFA(airExpressRate)} / Kg</span>
-                      </div>
-                      <div className="text-[11px] text-slate-500 mt-1">Délai : 3 à 5 jours ouvrés</div>
-                      <div className="text-[10px] text-slate-400 mt-0.5">Expédition prioritaire AIBD</div>
-                    </button>
-                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -295,7 +248,7 @@ export default function CbmSimulator({ settings }) {
                       className="w-full px-4 py-2.5 bg-white border border-[#CBD5E1] text-[#042442] font-bold text-sm rounded-none focus:outline-none focus:border-[#E2001A]"
                     />
                     <span className="text-[11px] text-slate-500 mt-1 block">
-                      Pesée exacte effectuée à l'arrivée dans notre entrepôt de Guangzhou.
+                      Pesée exacte effectuée à la réception dans notre entrepôt de Guangzhou.
                     </span>
                   </div>
 
@@ -314,22 +267,22 @@ export default function CbmSimulator({ settings }) {
                   </div>
                 </div>
 
-                {/* Calendar announcement for Air Cargo */}
-                <div className="p-3 bg-amber-50 border border-amber-200 text-xs text-[#042442] space-y-1">
-                  <div className="font-bold flex items-center gap-1.5 text-amber-900 uppercase tracking-wide text-[11px]">
-                    <Calendar className="w-3.5 h-3.5" />
-                    Prochain Départ Fixe Aérien Chine (CAN) ➔ Dakar (AIBD)
+                {/* Fixed dates for flight departures */}
+                <div className="p-3.5 bg-slate-50 border border-slate-200 text-xs text-[#042442] space-y-1">
+                  <div className="font-bold flex items-center gap-1.5 text-[#042442] uppercase tracking-wide text-[11px]">
+                    <Calendar className="w-3.5 h-3.5 text-[#E2001A]" />
+                    Dates de Rotation Aérienne Chine (CAN) ➔ Dakar (AIBD)
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 text-[11px]">
                     <div><span className="text-slate-500">Clôture Dépôt :</span> <strong>{nextAirCutoff}</strong></div>
-                    <div><span className="text-slate-500">Vol Fixe :</span> <strong>{nextAirDeparture}</strong></div>
+                    <div><span className="text-slate-500">Départ Vol :</span> <strong>{nextAirDeparture}</strong></div>
                     <div><span className="text-slate-500">Arrivée AIBD :</span> <strong>{nextAirArrival}</strong></div>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* Quick reassurance bullets */}
+            {/* Reassurance bullets */}
             <div className="pt-4 border-t border-slate-200 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-[#042442]">
               <div className="flex items-center gap-2">
                 <Check className="w-4 h-4 text-emerald-600 shrink-0" />
@@ -337,11 +290,11 @@ export default function CbmSimulator({ settings }) {
               </div>
               <div className="flex items-center gap-2">
                 <Check className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>Entrepôts sécurisés à Guangzhou</span>
+                <span>Réception sécurisée à Guangzhou</span>
               </div>
               <div className="flex items-center gap-2">
                 <Check className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>Zéro frais cachés à l'arrivée</span>
+                <span>Zéro taxe cachée à l'arrivée</span>
               </div>
               <div className="flex items-center gap-2">
                 <Check className="w-4 h-4 text-emerald-600 shrink-0" />
@@ -396,15 +349,13 @@ export default function CbmSimulator({ settings }) {
                   </h4>
                   <p className="text-xs text-[#475569] max-w-xs mx-auto leading-relaxed">
                     {isMaritime
-                      ? 'Saisissez la longueur, largeur, hauteur et le nombre de cartons ci-contre pour calculer instantanément le cubage CBM et le montant estimé.'
+                      ? 'Saisissez la longueur, largeur, hauteur et le nombre de cartons ci-contre pour calculer instantanément le montant.'
                       : 'Indiquez le poids estimé en Kg de votre colis pour obtenir le coût direct dédouané à Dakar au prix fixe au kilogramme.'}
                   </p>
                   <div className="pt-2 text-xs text-slate-400">
-                    Tarif officiel en vigueur :{' '}
+                    Tarif en vigueur :{' '}
                     <strong className="text-[#042442]">
-                      {isMaritime
-                        ? `${formatFCFA(seaRate)} / CBM`
-                        : `${formatFCFA(airService === 'AIR_EXPRESS' ? airExpressRate : airNormalRate)} / Kg`}
+                      {isMaritime ? `${formatFCFA(seaRate)} / CBM` : `${formatFCFA(airRate)} / Kg`}
                     </strong>
                   </div>
                 </div>
@@ -417,7 +368,7 @@ export default function CbmSimulator({ settings }) {
                   href={`https://wa.me/${waTargetPhone}?text=${encodeURIComponent(
                     isMaritime
                       ? `Bonjour Minane Cargo, je souhaite expédier par conteneur maritime depuis la Chine : ${result.unit} pour une estimation de ${formatFCFA(result.totalAmount)}. Merci de me communiquer l'adresse de réception en Chine.`
-                      : `Bonjour Minane Cargo, je souhaite expédier par fret aérien Chine ➔ Dakar : ${result.unit} (${result.details}) pour une estimation de ${formatFCFA(result.totalAmount)}. Merci de me communiquer l'adresse de réception à Guangzhou pour le prochain vol fixe.`
+                      : `Bonjour Minane Cargo, je souhaite expédier par fret aérien Chine ➔ Dakar : ${result.unit} pour une estimation de ${formatFCFA(result.totalAmount)}. Merci de me communiquer l'adresse de réception à Guangzhou pour le prochain vol fixe.`
                   )}`}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -437,7 +388,7 @@ export default function CbmSimulator({ settings }) {
               )}
 
               <p className="text-[11px] text-slate-400 text-center">
-                Tarif indicatif garanti pour marchandises générales hors matières dangereuses et batteries non homologuées.
+                Dès l'enregistrement du colis en Chine, un numéro de suivi officiel vous est remis pour suivre l'expédition en temps réel.
               </p>
             </div>
 
