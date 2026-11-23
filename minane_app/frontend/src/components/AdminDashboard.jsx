@@ -325,6 +325,8 @@ export default function AdminDashboard({ adminUser, onLogout }) {
           receivables={receivables}
           recentPayments={recentPayments}
           shipments={shipments}
+          containers={containers}
+          clients={clients}
           onOpenPaymentModal={(s) => {
             setPaymentShipment(s);
             setPayAmount(s.remainingBalance);

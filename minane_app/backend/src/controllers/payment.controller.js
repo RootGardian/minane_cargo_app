@@ -143,12 +143,15 @@ const paymentController = {
               trackingCode: true,
               description: true,
               totalAmount: true,
-              client: { select: { fullName: true, phone: true } }
+              transportMode: true,
+              cbm: true,
+              container: { select: { containerNumber: true } },
+              client: { select: { id: true, fullName: true, phone: true } }
             }
           }
         },
         orderBy: { paidAt: 'desc' },
-        take: 50
+        take: 500
       });
 
       res.json(payments);
