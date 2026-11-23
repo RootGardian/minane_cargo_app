@@ -45,60 +45,146 @@ export default function SettingsTab({
       </div>
 
       <form onSubmit={onSaveSettings} className="space-y-6">
-        {/* Pricing Settings (Exclusivement Fret Maritime) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-xs font-bold text-[#042442] uppercase mb-1">
-              Tarif Maritime Groupage (FCFA / CBM)
-            </label>
-            <input
-              type="number"
-              value={settingsForm.maritimeCbmRate}
-              onChange={(e) => setSettingsForm({ ...settingsForm, maritimeCbmRate: e.target.value })}
-              className="w-full px-4 py-2.5 border border-slate-300 font-bold text-[#042442] rounded-none focus:outline-none focus:border-[#042442]"
-            />
-            <p className="text-[11px] text-slate-500 mt-1">
-              Tarif de référence appliqué automatiquement au calcul de fret maritime dédouané.
-            </p>
+        {/* Section Fret Maritime : Tarifs & Départs */}
+        <div className="bg-[#F8FAFC] p-4 border border-slate-200">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-base">🚢</span>
+            <h3 className="text-xs font-bold text-[#042442] uppercase tracking-wider">
+              Fret Maritime Groupage (Guangzhou / Nansha ➔ Port de Dakar)
+            </h3>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label className="block text-xs font-bold text-[#042442] uppercase mb-1">
+                Tarif Maritime Groupage (FCFA / CBM)
+              </label>
+              <input
+                type="number"
+                value={settingsForm.maritimeCbmRate}
+                onChange={(e) => setSettingsForm({ ...settingsForm, maritimeCbmRate: e.target.value })}
+                className="w-full px-4 py-2.5 border border-slate-300 font-bold text-[#042442] rounded-none focus:outline-none focus:border-[#042442] bg-white"
+              />
+              <p className="text-[11px] text-slate-500 mt-1">
+                Tarif de référence appliqué automatiquement au calcul de fret maritime dédouané par CBM.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-[#042442] uppercase mb-1">
+                Date Limite Réception Chine (Cut-off Maritime)
+              </label>
+              <input
+                type="date"
+                value={settingsForm.nextCutoffDate}
+                onChange={(e) => setSettingsForm({ ...settingsForm, nextCutoffDate: e.target.value })}
+                className="w-full px-4 py-2 border border-slate-300 font-semibold text-[#042442] rounded-none bg-white"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-[#042442] uppercase mb-1">
+                Date de Chargement / Départ Conteneur
+              </label>
+              <input
+                type="date"
+                value={settingsForm.nextLoadingDate}
+                onChange={(e) => setSettingsForm({ ...settingsForm, nextLoadingDate: e.target.value })}
+                className="w-full px-4 py-2 border border-slate-300 font-semibold text-[#042442] rounded-none bg-white"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-[#042442] uppercase mb-1">
+                Date Arrivée Estimée à Dakar (ETA Port)
+              </label>
+              <input
+                type="date"
+                value={settingsForm.nextEstimatedArrival}
+                onChange={(e) => setSettingsForm({ ...settingsForm, nextEstimatedArrival: e.target.value })}
+                className="w-full px-4 py-2 border border-slate-300 font-semibold text-[#042442] rounded-none bg-white"
+              />
+            </div>
           </div>
         </div>
 
-        {/* Departure Dates */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div>
-            <label className="block text-xs font-bold text-[#042442] uppercase mb-1">
-              Date Limite Réception Chine (Cut-off)
-            </label>
-            <input
-              type="date"
-              value={settingsForm.nextCutoffDate}
-              onChange={(e) => setSettingsForm({ ...settingsForm, nextCutoffDate: e.target.value })}
-              className="w-full px-4 py-2.5 border border-slate-300 font-semibold text-[#042442] rounded-none focus:outline-none focus:border-[#042442]"
-            />
+        {/* Section Fret Aérien : Tarifs au Kg & Vols Fixes */}
+        <div className="bg-[#FFF9F9] p-4 border border-rose-200">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-base">✈️</span>
+            <h3 className="text-xs font-bold text-[#E2001A] uppercase tracking-wider">
+              Groupage Aérien Express & Standard (Guangzhou CAN ➔ Dakar AIBD)
+            </h3>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label className="block text-xs font-bold text-[#042442] uppercase mb-1">
+                Tarif Aérien Standard (FCFA / Kg) — 7 à 10 jours
+              </label>
+              <input
+                type="number"
+                value={settingsForm.airNormalKgRate || 8500}
+                onChange={(e) => setSettingsForm({ ...settingsForm, airNormalKgRate: e.target.value })}
+                className="w-full px-4 py-2.5 border border-slate-300 font-bold text-[#042442] rounded-none focus:outline-none focus:border-[#E2001A] bg-white"
+              />
+              <p className="text-[11px] text-slate-500 mt-1">
+                Prix fixe par kilogramme pour le groupage cargo régulier.
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-[#042442] uppercase mb-1">
+                Tarif Aérien Express (FCFA / Kg) — 3 à 5 jours
+              </label>
+              <input
+                type="number"
+                value={settingsForm.airExpressKgRate || 11000}
+                onChange={(e) => setSettingsForm({ ...settingsForm, airExpressKgRate: e.target.value })}
+                className="w-full px-4 py-2.5 border border-slate-300 font-bold text-[#042442] rounded-none focus:outline-none focus:border-[#E2001A] bg-white"
+              />
+              <p className="text-[11px] text-slate-500 mt-1">
+                Prix fixe par kilogramme pour expédition ultra-rapide par avion.
+              </p>
+            </div>
           </div>
 
-          <div>
-            <label className="block text-xs font-bold text-[#042442] uppercase mb-1">
-              Date de Chargement Conteneur
-            </label>
-            <input
-              type="date"
-              value={settingsForm.nextLoadingDate}
-              onChange={(e) => setSettingsForm({ ...settingsForm, nextLoadingDate: e.target.value })}
-              className="w-full px-4 py-2.5 border border-slate-300 font-semibold text-[#042442] rounded-none focus:outline-none focus:border-[#042442]"
-            />
-          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-[#042442] uppercase mb-1">
+                Date Clôture Dépôt Aérien Chine
+              </label>
+              <input
+                type="date"
+                value={settingsForm.nextAirCutoffDate || ''}
+                onChange={(e) => setSettingsForm({ ...settingsForm, nextAirCutoffDate: e.target.value })}
+                className="w-full px-4 py-2 border border-slate-300 font-semibold text-[#042442] rounded-none bg-white"
+              />
+            </div>
 
-          <div>
-            <label className="block text-xs font-bold text-[#042442] uppercase mb-1">
-              Date Arrivée Estimée à Dakar (ETA)
-            </label>
-            <input
-              type="date"
-              value={settingsForm.nextEstimatedArrival}
-              onChange={(e) => setSettingsForm({ ...settingsForm, nextEstimatedArrival: e.target.value })}
-              className="w-full px-4 py-2.5 border border-slate-300 font-semibold text-[#042442] rounded-none focus:outline-none focus:border-[#042442]"
-            />
+            <div>
+              <label className="block text-xs font-bold text-[#042442] uppercase mb-1">
+                Date Fixe Décollage Vol (Chine CAN)
+              </label>
+              <input
+                type="date"
+                value={settingsForm.nextAirDepartureDate || ''}
+                onChange={(e) => setSettingsForm({ ...settingsForm, nextAirDepartureDate: e.target.value })}
+                className="w-full px-4 py-2 border border-slate-300 font-semibold text-[#042442] rounded-none bg-white"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-[#042442] uppercase mb-1">
+                Date Estimée Arrivée Dakar (AIBD)
+              </label>
+              <input
+                type="date"
+                value={settingsForm.nextAirArrivalDate || ''}
+                onChange={(e) => setSettingsForm({ ...settingsForm, nextAirArrivalDate: e.target.value })}
+                className="w-full px-4 py-2 border border-slate-300 font-semibold text-[#042442] rounded-none bg-white"
+              />
+            </div>
           </div>
         </div>
 

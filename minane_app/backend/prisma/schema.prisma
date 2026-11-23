@@ -15,6 +15,9 @@ model AppSettings {
   nextCutoffDate       DateTime?
   nextLoadingDate      DateTime?
   nextEstimatedArrival DateTime?
+  nextAirCutoffDate    DateTime?
+  nextAirDepartureDate DateTime?
+  nextAirArrivalDate   DateTime?
   announcementBanner   String?
   phoneDakar           String    @default("+221 70 596 12 76")
   phoneGuangzhou       String    @default("+86 137 1104 5051")

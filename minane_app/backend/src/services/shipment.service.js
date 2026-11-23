@@ -156,7 +156,13 @@ async function createShipment(data) {
 
   // 2. Récupération des taux actifs
   const settings = await prisma.appSettings.findUnique({ where: { id: 1 } });
-  const defaultRate = settings?.maritimeCbmRate || 165000;
+  
+  let defaultRate = settings?.maritimeCbmRate || 165000;
+  if (transportMode === 'AIR_NORMAL') {
+    defaultRate = settings?.airNormalKgRate || 8500;
+  } else if (transportMode === 'AIR_EXPRESS') {
+    defaultRate = settings?.airExpressKgRate || 11000;
+  }
 
   const appliedRate = overrideRate !== undefined && overrideRate !== null && overrideRate !== ''
     ? parseInt(overrideRate, 10)
@@ -167,8 +173,13 @@ async function createShipment(data) {
   if (overrideTotalAmount !== undefined && overrideTotalAmount !== null && overrideTotalAmount !== '') {
     calculatedAmount = parseInt(overrideTotalAmount, 10);
   } else {
-    const safeCbm = parseFloat(cbm) || 0;
-    calculatedAmount = Math.round(safeCbm * appliedRate);
+    if (transportMode === 'AIR_NORMAL' || transportMode === 'AIR_EXPRESS') {
+      const safeWeight = parseFloat(weight) || 0;
+      calculatedAmount = Math.round(safeWeight * appliedRate);
+    } else {
+      const safeCbm = parseFloat(cbm) || 0;
+      calculatedAmount = Math.round(safeCbm * appliedRate);
+    }
   }
 
   // 4. Génération code de suivi unique MNC-XXXX[A-Z] & PIN à 4 chiffres

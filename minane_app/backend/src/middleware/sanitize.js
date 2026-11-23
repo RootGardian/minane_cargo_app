@@ -237,7 +237,7 @@ const VALIDATORS = {
   },
 
   isValidTransportMode(mode) {
-    return mode === 'MARITIME_LCL' || mode === 'MARITIME_FCL';
+    return ['MARITIME_LCL', 'MARITIME_FCL', 'AIR_NORMAL', 'AIR_EXPRESS'].includes(mode);
   },
 
   isValidPaymentMethod(method) {

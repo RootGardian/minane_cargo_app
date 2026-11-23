@@ -5,13 +5,15 @@ services:
       dockerfile: Dockerfile
     container_name: minane_cargo
     restart: always
+    ports:
+      - "5000:5000"
     expose:
       - "5000"
     environment:
       - NODE_ENV=production
       - PORT=5000
       - APP_URL=https://minane-cargo-app.blackcoretech.duckdns.org
-      - VIRTUAL_HOST=${VIRTUAL_HOST:-minane-cargo-app.blackcoretech.duckdns.org}
+      - VIRTUAL_HOST=${VIRTUAL_HOST:-minane-cargo-app.blackcoretech.duckdns.org,minane_cargo_app.blackcoretech.duckdns.org,minane-cargo.blackcoretech.duckdns.org}
       - VIRTUAL_PORT=5000
       - LETSENCRYPT_HOST=${LETSENCRYPT_HOST:-minane-cargo-app.blackcoretech.duckdns.org}
       - JWT_SECRET=${JWT_SECRET:-minane_secret_jwt_key_2026_odhbilunnlqbheçtumbqnqçuib}

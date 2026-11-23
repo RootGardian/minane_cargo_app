@@ -123,9 +123,14 @@ export default function AdminDashboard({ adminUser, onLogout }) {
     if (settings) {
       setSettingsForm({
         maritimeCbmRate: settings.maritimeCbmRate,
+        airNormalKgRate: settings.airNormalKgRate || 8500,
+        airExpressKgRate: settings.airExpressKgRate || 11000,
         nextCutoffDate: settings.nextCutoffDate ? settings.nextCutoffDate.split('T')[0] : '',
         nextLoadingDate: settings.nextLoadingDate ? settings.nextLoadingDate.split('T')[0] : '',
         nextEstimatedArrival: settings.nextEstimatedArrival ? settings.nextEstimatedArrival.split('T')[0] : '',
+        nextAirCutoffDate: settings.nextAirCutoffDate ? settings.nextAirCutoffDate.split('T')[0] : '',
+        nextAirDepartureDate: settings.nextAirDepartureDate ? settings.nextAirDepartureDate.split('T')[0] : '',
+        nextAirArrivalDate: settings.nextAirArrivalDate ? settings.nextAirArrivalDate.split('T')[0] : '',
         announcementBanner: settings.announcementBanner || '',
         phoneDakar: settings.phoneDakar || '+221 70 596 12 76',
         phoneGuangzhou: settings.phoneGuangzhou || '+86 137 1104 5051',

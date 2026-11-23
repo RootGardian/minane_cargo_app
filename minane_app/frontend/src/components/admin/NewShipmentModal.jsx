@@ -113,8 +113,10 @@ export default function NewShipmentModal({
                   onChange={(e) => setNewShipment({ ...newShipment, transportMode: e.target.value })}
                   className="w-full px-3 py-2 border border-slate-300 text-xs font-semibold bg-white rounded-none"
                 >
-                  <option value="MARITIME_LCL">Maritime Groupage (LCL)</option>
-                  <option value="MARITIME_FCL">Maritime Conteneur Plein</option>
+                  <option value="MARITIME_LCL">🚢 Maritime Groupage (LCL)</option>
+                  <option value="MARITIME_FCL">🚢 Maritime Conteneur Plein</option>
+                  <option value="AIR_NORMAL">✈️ Aérien — Groupage Standard (7-10j / Kg)</option>
+                  <option value="AIR_EXPRESS">⚡ Aérien — Express (3-5j / Kg)</option>
                 </select>
               </div>
 
@@ -133,7 +135,7 @@ export default function NewShipmentModal({
 
               <div>
                 <label className="block text-xs font-bold text-[#042442] uppercase mb-1">
-                  Conteneur Assigné
+                  {newShipment.transportMode?.startsWith('AIR') ? 'Vol / Lot Assigné' : 'Conteneur Assigné'}
                 </label>
                 <select
                   value={newShipment.containerId}
@@ -149,9 +151,9 @@ export default function NewShipmentModal({
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <div>
+              <div className={newShipment.transportMode?.startsWith('AIR') ? 'opacity-70' : ''}>
                 <label className="block text-xs font-bold text-[#042442] uppercase mb-1">
-                  Volume CBM (m³)
+                  Volume CBM (m³) {!newShipment.transportMode?.startsWith('AIR') && <span className="text-[#E2001A]">* (Base facturation)</span>}
                 </label>
                 <input
                   type="number"
@@ -162,17 +164,17 @@ export default function NewShipmentModal({
                   className="w-full px-3 py-2 border border-slate-300 text-xs font-semibold rounded-none"
                 />
               </div>
-              <div>
+              <div className={newShipment.transportMode?.startsWith('AIR') ? 'p-1 bg-red-50 border border-red-200' : ''}>
                 <label className="block text-xs font-bold text-[#042442] uppercase mb-1">
-                  Poids (Kg)
+                  Poids (Kg) {newShipment.transportMode?.startsWith('AIR') && <span className="text-[#E2001A] font-black">* (Base facturation Aérien)</span>}
                 </label>
                 <input
                   type="number"
                   step="0.1"
-                  placeholder="Ex : 120"
+                  placeholder="Ex : 25"
                   value={newShipment.weight}
                   onChange={(e) => setNewShipment({ ...newShipment, weight: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 text-xs font-semibold rounded-none"
+                  className="w-full px-3 py-2 border border-slate-300 text-xs font-bold rounded-none"
                 />
               </div>
             </div>
@@ -184,17 +186,27 @@ export default function NewShipmentModal({
               ★ CALCUL TARIFAIRE AUTOMATIQUE & OVERRIDE VIP
             </span>
             <p className="text-[11px] text-slate-600">
-              Le système applique la grille active. Vous pouvez écraser manuellement le tarif unitaire ou le montant total pour un client VIP Sandaga.
+              {newShipment.transportMode?.startsWith('AIR')
+                ? `Tarif Aérien actif : ${newShipment.transportMode === 'AIR_EXPRESS' ? (settings?.airExpressKgRate || 11000) : (settings?.airNormalKgRate || 8500)} FCFA / Kg.`
+                : `Tarif Maritime actif : ${settings?.maritimeCbmRate || 165000} FCFA / CBM.`
+              }
+              {' '}Vous pouvez écraser manuellement le tarif ou le montant pour un client VIP.
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
               <div>
                 <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                  Tarif Unitaire Personnalisé (FCFA)
+                  Tarif Unitaire Personnalisé (FCFA / {newShipment.transportMode?.startsWith('AIR') ? 'Kg' : 'CBM'})
                 </label>
                 <input
                   type="number"
-                  placeholder={`Défaut : ${settings?.maritimeCbmRate || 165000}`}
+                  placeholder={
+                    newShipment.transportMode === 'AIR_EXPRESS'
+                      ? `Défaut : ${settings?.airExpressKgRate || 11000} FCFA/Kg`
+                      : newShipment.transportMode === 'AIR_NORMAL'
+                      ? `Défaut : ${settings?.airNormalKgRate || 8500} FCFA/Kg`
+                      : `Défaut : ${settings?.maritimeCbmRate || 165000} FCFA/CBM`
+                  }
                   value={newShipment.overrideRate}
                   onChange={(e) => setNewShipment({ ...newShipment, overrideRate: e.target.value })}
                   className="w-full px-3 py-2 border border-slate-300 bg-white text-xs font-semibold rounded-none"

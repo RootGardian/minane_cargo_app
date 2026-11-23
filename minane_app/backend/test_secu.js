@@ -74,8 +74,8 @@ test('Téléphone avec lettres rejeté', !VALIDATORS.isValidPhone('+221abc123'))
 // Transport mode
 test('MARITIME_LCL valide', VALIDATORS.isValidTransportMode('MARITIME_LCL'));
 test('MARITIME_FCL valide', VALIDATORS.isValidTransportMode('MARITIME_FCL'));
-test('AIR_EXPRESS rejeté', !VALIDATORS.isValidTransportMode('AIR_EXPRESS'));
-test('AIR_NORMAL rejeté', !VALIDATORS.isValidTransportMode('AIR_NORMAL'));
+test('AIR_EXPRESS valide', VALIDATORS.isValidTransportMode('AIR_EXPRESS'));
+test('AIR_NORMAL valide', VALIDATORS.isValidTransportMode('AIR_NORMAL'));
 test('Injection rejetée', !VALIDATORS.isValidTransportMode("'; DROP TABLE--"));
 
 // Payment method

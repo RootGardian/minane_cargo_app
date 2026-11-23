@@ -1,26 +1,58 @@
 import React, { useState } from 'react';
-import { Calculator, Ship, Check, ArrowRight } from 'lucide-react';
+import { Calculator, Ship, Plane, Check, ArrowRight, Zap, Calendar } from 'lucide-react';
 import { getCompanyInfo, cleanPhoneForWA } from '../utils/company';
 
 const formatFCFA = (val) => new Intl.NumberFormat('fr-FR').format(val || 0) + ' FCFA';
 
+const formatDisplayDate = (dateVal) => {
+  if (!dateVal) return null;
+  try {
+    const d = new Date(dateVal);
+    if (isNaN(d.getTime())) return null;
+    return d.toLocaleDateString('fr-FR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: '2-digit'
+    });
+  } catch (e) {
+    return null;
+  }
+};
+
 export default function CbmSimulator({ settings }) {
   const company = getCompanyInfo(settings);
   const waTargetPhone = cleanPhoneForWA(company.phoneDakar);
-  // Maritime Inputs (cm) - initialized empty
+
+  // Mode switcher: 'MARITIME' | 'AIR'
+  const [transportMode, setTransportMode] = useState('MARITIME');
+
+  // Maritime Inputs (cm)
   const [length, setLength] = useState('');
   const [width, setWidth] = useState('');
   const [height, setHeight] = useState('');
   const [cartonCount, setCartonCount] = useState('');
 
-  // Active Tariffs from settings or defaults (configured by Admin)
+  // Air Inputs (kg)
+  const [airService, setAirService] = useState('AIR_NORMAL'); // 'AIR_NORMAL' | 'AIR_EXPRESS'
+  const [airWeight, setAirWeight] = useState('');
+  const [airCartonCount, setAirCartonCount] = useState('');
+
+  // Active Tariffs from settings or defaults
   const seaRate = settings?.maritimeCbmRate || 165000;
+  const airNormalRate = settings?.airNormalKgRate || 8500;
+  const airExpressRate = settings?.airExpressKgRate || 11000;
+
+  // Flight dates
+  const nextAirCutoff = formatDisplayDate(settings?.nextAirCutoffDate) || 'Chaque Jeudi 18h';
+  const nextAirDeparture = formatDisplayDate(settings?.nextAirDepartureDate) || 'Chaque Samedi';
+  const nextAirArrival = formatDisplayDate(settings?.nextAirArrivalDate) || 'Mercredi suivant (AIBD)';
 
   // Validation
-  const hasValidInput = Number(length) > 0 && Number(width) > 0 && Number(height) > 0 && Number(cartonCount) > 0;
+  const hasValidMaritimeInput = Number(length) > 0 && Number(width) > 0 && Number(height) > 0 && Number(cartonCount) > 0;
+  const hasValidAirInput = Number(airWeight) > 0;
 
   // Real-time calculations
-  const calculateResult = () => {
+  const calculateMaritimeResult = () => {
     const singleBoxCbm = (Number(length || 0) * Number(width || 0) * Number(height || 0)) / 1000000;
     const totalCbm = singleBoxCbm * Number(cartonCount || 0);
     const totalAmount = Math.round(totalCbm * seaRate);
@@ -32,24 +64,68 @@ export default function CbmSimulator({ settings }) {
     };
   };
 
-  const result = calculateResult();
+  const calculateAirResult = () => {
+    const appliedKgRate = airService === 'AIR_EXPRESS' ? airExpressRate : airNormalRate;
+    const totalAmount = Math.round(Number(airWeight || 0) * appliedKgRate);
+    return {
+      unit: `${Number(airWeight || 0)} Kg`,
+      rateApplied: `${formatFCFA(appliedKgRate)} / Kg`,
+      totalAmount,
+      details: `${airService === 'AIR_EXPRESS' ? 'Aérien Express (3-5 jours)' : 'Aérien Standard (7-10 jours)'}${airCartonCount ? ` — ${airCartonCount} colis` : ''}`,
+    };
+  };
+
+  const isMaritime = transportMode === 'MARITIME';
+  const hasValidInput = isMaritime ? hasValidMaritimeInput : hasValidAirInput;
+  const result = isMaritime ? calculateMaritimeResult() : calculateAirResult();
 
   return (
     <section id="simulateur" className="bg-white py-16 sm:py-24 border-b border-[#E2E8F0]">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Section Header */}
-        <div className="max-w-3xl mb-12">
+        <div className="max-w-3xl mb-8">
           <div className="inline-flex items-center gap-2 text-xs font-bold text-[#E2001A] uppercase tracking-widest mb-2">
-            <Ship className="w-4 h-4" />
-            Fret Maritime Groupage (LCL & FCL)
+            {isMaritime ? <Ship className="w-4 h-4" /> : <Plane className="w-4 h-4" />}
+            {isMaritime ? 'Fret Maritime Groupage (LCL & FCL)' : 'Groupage & Fret Aérien Régulier (Chine ➔ Dakar)'}
           </div>
           <h2 className="text-3xl sm:text-5xl font-light text-[#042442] tracking-tight">
-            Simulateur de Cubage & Fret Maritime Chine ➔ {company.addressDakar}
+            Simulateur de Fret Chine ➔ {company.addressDakar}
           </h2>
           <p className="text-sm sm:text-base text-[#475569] mt-3">
-            Obtenez immédiatement une estimation précise et transparente de votre fret maritime dédouané au départ de nos entrepôts de Guangzhou vers {company.addressDakar}.
+            Obtenez immédiatement une estimation précise et dédouanée pour vos expéditions au départ de nos entrepôts de Guangzhou vers {company.addressDakar}.
           </p>
+        </div>
+
+        {/* Transport Mode Switcher Tabs */}
+        <div className="flex flex-wrap items-center gap-3 mb-8">
+          <button
+            type="button"
+            onClick={() => setTransportMode('MARITIME')}
+            className={`flex items-center gap-2.5 px-6 py-3.5 text-xs font-bold uppercase tracking-wider transition border ${
+              isMaritime
+                ? 'bg-[#042442] text-white border-[#042442] shadow-sm'
+                : 'bg-[#F4F6F9] text-slate-700 border-slate-300 hover:bg-slate-200'
+            }`}
+          >
+            <Ship className="w-4 h-4" />
+            <span>Fret Maritime Conteneur (au m³ / CBM)</span>
+            <span className="ml-1 text-[10px] px-1.5 py-0.5 rounded bg-white/20">35-40 jours</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setTransportMode('AIR')}
+            className={`flex items-center gap-2.5 px-6 py-3.5 text-xs font-bold uppercase tracking-wider transition border ${
+              !isMaritime
+                ? 'bg-[#E2001A] text-white border-[#E2001A] shadow-sm'
+                : 'bg-[#F4F6F9] text-slate-700 border-slate-300 hover:bg-slate-200'
+            }`}
+          >
+            <Plane className="w-4 h-4" />
+            <span>Groupage Aérien Express & Standard (au Kg)</span>
+            <span className="ml-1 text-[10px] px-1.5 py-0.5 rounded bg-white/20">3-10 jours</span>
+          </button>
         </div>
 
         {/* 2-Column Calculator Layout */}
@@ -58,86 +134,200 @@ export default function CbmSimulator({ settings }) {
           {/* LEFT: Inputs Form (7 cols) */}
           <div className="lg:col-span-7 bg-[#F4F6F9] border border-[#E2E8F0] p-6 sm:p-8 space-y-6">
 
-            <div className="space-y-5">
-              <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-                <span className="text-xs font-bold text-[#042442] uppercase tracking-wider">
-                  Dimensions d'un carton (en centimètres)
-                </span>
-                <div className="flex items-center gap-3">
-                  {(length || width || height || cartonCount) && (
+            {isMaritime ? (
+              /* MARITIME FORM */
+              <div className="space-y-5">
+                <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+                  <span className="text-xs font-bold text-[#042442] uppercase tracking-wider">
+                    Dimensions d'un carton (en centimètres)
+                  </span>
+                  <div className="flex items-center gap-3">
+                    {(length || width || height || cartonCount) && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setLength('');
+                          setWidth('');
+                          setHeight('');
+                          setCartonCount('');
+                        }}
+                        className="text-[11px] font-bold text-[#E2001A] hover:underline"
+                      >
+                        Effacer tout ✕
+                      </button>
+                    )}
+                    <span className="text-xs text-slate-500 font-mono">Longueur × Largeur × Hauteur</span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-3 sm:gap-4">
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 mb-1">Longueur (cm)</label>
+                    <input
+                      type="number"
+                      min="1"
+                      placeholder="ex: 50"
+                      value={length}
+                      onChange={(e) => setLength(e.target.value)}
+                      className="w-full px-3 py-2.5 bg-white border border-[#CBD5E1] text-[#042442] font-semibold text-sm rounded-none focus:outline-none focus:border-[#042442]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 mb-1">Largeur (cm)</label>
+                    <input
+                      type="number"
+                      min="1"
+                      placeholder="ex: 40"
+                      value={width}
+                      onChange={(e) => setWidth(e.target.value)}
+                      className="w-full px-3 py-2.5 bg-white border border-[#CBD5E1] text-[#042442] font-semibold text-sm rounded-none focus:outline-none focus:border-[#042442]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 mb-1">Hauteur (cm)</label>
+                    <input
+                      type="number"
+                      min="1"
+                      placeholder="ex: 40"
+                      value={height}
+                      onChange={(e) => setHeight(e.target.value)}
+                      className="w-full px-3 py-2.5 bg-white border border-[#CBD5E1] text-[#042442] font-semibold text-sm rounded-none focus:outline-none focus:border-[#042442]"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-[#042442] uppercase tracking-wider mb-1">
+                    Nombre total de colis / cartons identiques
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    placeholder="ex: 5"
+                    value={cartonCount}
+                    onChange={(e) => setCartonCount(e.target.value)}
+                    className="w-full sm:w-1/2 px-4 py-2.5 bg-white border border-[#CBD5E1] text-[#042442] font-semibold text-sm rounded-none focus:outline-none focus:border-[#042442]"
+                  />
+                </div>
+
+                <p className="text-xs text-slate-500 italic">
+                  * Formule standard maritime internationale : (Longueur × Largeur × Hauteur en cm) ÷ 1 000 000 × Quantité.
+                </p>
+              </div>
+            ) : (
+              /* AIR FREIGHT FORM */
+              <div className="space-y-5">
+                <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+                  <span className="text-xs font-bold text-[#E2001A] uppercase tracking-wider flex items-center gap-2">
+                    <Plane className="w-4 h-4" />
+                    Groupage Aérien : Prix Fixe au Kilogramme
+                  </span>
+                  {airWeight && (
                     <button
                       type="button"
                       onClick={() => {
-                        setLength('');
-                        setWidth('');
-                        setHeight('');
-                        setCartonCount('');
+                        setAirWeight('');
+                        setAirCartonCount('');
                       }}
                       className="text-[11px] font-bold text-[#E2001A] hover:underline"
                     >
                       Effacer tout ✕
                     </button>
                   )}
-                  <span className="text-xs text-slate-500 font-mono">Longueur × Largeur × Hauteur</span>
+                </div>
+
+                {/* Air Service Choice */}
+                <div>
+                  <label className="block text-xs font-bold text-[#042442] uppercase tracking-wider mb-2">
+                    Formule Aérienne Souhaitée
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setAirService('AIR_NORMAL')}
+                      className={`p-3 text-left border transition ${
+                        airService === 'AIR_NORMAL'
+                          ? 'border-[#042442] bg-white ring-2 ring-[#042442]'
+                          : 'border-slate-300 bg-white hover:border-slate-400'
+                      }`}
+                    >
+                      <div className="font-bold text-xs text-[#042442] flex items-center justify-between">
+                        <span>✈️ Standard Cargo</span>
+                        <span className="text-[#E2001A]">{formatFCFA(airNormalRate)} / Kg</span>
+                      </div>
+                      <div className="text-[11px] text-slate-500 mt-1">Délai : 7 à 10 jours ouvrés</div>
+                      <div className="text-[10px] text-slate-400 mt-0.5">Vols réguliers hebdomadaires</div>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setAirService('AIR_EXPRESS')}
+                      className={`p-3 text-left border transition ${
+                        airService === 'AIR_EXPRESS'
+                          ? 'border-[#E2001A] bg-white ring-2 ring-[#E2001A]'
+                          : 'border-slate-300 bg-white hover:border-slate-400'
+                      }`}
+                    >
+                      <div className="font-bold text-xs text-[#042442] flex items-center justify-between">
+                        <span className="flex items-center gap-1"><Zap className="w-3.5 h-3.5 text-amber-500 fill-amber-500" /> Express Prioritaire</span>
+                        <span className="text-[#E2001A]">{formatFCFA(airExpressRate)} / Kg</span>
+                      </div>
+                      <div className="text-[11px] text-slate-500 mt-1">Délai : 3 à 5 jours ouvrés</div>
+                      <div className="text-[10px] text-slate-400 mt-0.5">Expédition prioritaire AIBD</div>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-[#042442] uppercase tracking-wider mb-1">
+                      Poids Total Réel (Kg) *
+                    </label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      min="0.5"
+                      placeholder="ex: 15"
+                      value={airWeight}
+                      onChange={(e) => setAirWeight(e.target.value)}
+                      className="w-full px-4 py-2.5 bg-white border border-[#CBD5E1] text-[#042442] font-bold text-sm rounded-none focus:outline-none focus:border-[#E2001A]"
+                    />
+                    <span className="text-[11px] text-slate-500 mt-1 block">
+                      Pesée exacte effectuée à l'arrivée dans notre entrepôt de Guangzhou.
+                    </span>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-[#042442] uppercase tracking-wider mb-1">
+                      Nombre de colis (Optionnel)
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      placeholder="ex: 2"
+                      value={airCartonCount}
+                      onChange={(e) => setAirCartonCount(e.target.value)}
+                      className="w-full px-4 py-2.5 bg-white border border-[#CBD5E1] text-[#042442] font-semibold text-sm rounded-none focus:outline-none focus:border-[#042442]"
+                    />
+                  </div>
+                </div>
+
+                {/* Calendar announcement for Air Cargo */}
+                <div className="p-3 bg-amber-50 border border-amber-200 text-xs text-[#042442] space-y-1">
+                  <div className="font-bold flex items-center gap-1.5 text-amber-900 uppercase tracking-wide text-[11px]">
+                    <Calendar className="w-3.5 h-3.5" />
+                    Prochain Départ Fixe Aérien Chine (CAN) ➔ Dakar (AIBD)
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 text-[11px]">
+                    <div><span className="text-slate-500">Clôture Dépôt :</span> <strong>{nextAirCutoff}</strong></div>
+                    <div><span className="text-slate-500">Vol Fixe :</span> <strong>{nextAirDeparture}</strong></div>
+                    <div><span className="text-slate-500">Arrivée AIBD :</span> <strong>{nextAirArrival}</strong></div>
+                  </div>
                 </div>
               </div>
-
-              <div className="grid grid-cols-3 gap-3 sm:gap-4">
-                <div>
-                  <label className="block text-xs font-medium text-slate-600 mb-1">Longueur (cm)</label>
-                  <input
-                    type="number"
-                    min="1"
-                    placeholder="ex: 50"
-                    value={length}
-                    onChange={(e) => setLength(e.target.value)}
-                    className="w-full px-3 py-2.5 bg-white border border-[#CBD5E1] text-[#042442] font-semibold text-sm rounded-none focus:outline-none focus:border-[#042442]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-medium text-slate-600 mb-1">Largeur (cm)</label>
-                  <input
-                    type="number"
-                    min="1"
-                    placeholder="ex: 40"
-                    value={width}
-                    onChange={(e) => setWidth(e.target.value)}
-                    className="w-full px-3 py-2.5 bg-white border border-[#CBD5E1] text-[#042442] font-semibold text-sm rounded-none focus:outline-none focus:border-[#042442]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-medium text-slate-600 mb-1">Hauteur (cm)</label>
-                  <input
-                    type="number"
-                    min="1"
-                    placeholder="ex: 40"
-                    value={height}
-                    onChange={(e) => setHeight(e.target.value)}
-                    className="w-full px-3 py-2.5 bg-white border border-[#CBD5E1] text-[#042442] font-semibold text-sm rounded-none focus:outline-none focus:border-[#042442]"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-[#042442] uppercase tracking-wider mb-1">
-                  Nombre total de colis / cartons identiques
-                </label>
-                <input
-                  type="number"
-                  min="1"
-                  placeholder="ex: 5"
-                  value={cartonCount}
-                  onChange={(e) => setCartonCount(e.target.value)}
-                  className="w-full sm:w-1/2 px-4 py-2.5 bg-white border border-[#CBD5E1] text-[#042442] font-semibold text-sm rounded-none focus:outline-none focus:border-[#042442]"
-                />
-              </div>
-
-              <p className="text-xs text-slate-500 italic">
-                * Formule standard maritime internationale : (Longueur × Largeur × Hauteur en cm) ÷ 1 000 000 × Quantité.
-              </p>
-            </div>
+            )}
 
             {/* Quick reassurance bullets */}
             <div className="pt-4 border-t border-slate-200 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-[#042442]">
@@ -147,11 +337,11 @@ export default function CbmSimulator({ settings }) {
               </div>
               <div className="flex items-center gap-2">
                 <Check className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>Réception entrepôts Guangzhou</span>
+                <span>Entrepôts sécurisés à Guangzhou</span>
               </div>
               <div className="flex items-center gap-2">
                 <Check className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>Zéro taxe surprise à l'arrivée</span>
+                <span>Zéro frais cachés à l'arrivée</span>
               </div>
               <div className="flex items-center gap-2">
                 <Check className="w-4 h-4 text-emerald-600 shrink-0" />
@@ -167,7 +357,7 @@ export default function CbmSimulator({ settings }) {
             <div>
               <div className="flex items-center justify-between border-b border-[#E2E8F0] pb-4">
                 <span className="text-xs font-bold text-[#042442] uppercase tracking-widest">
-                  ESTIMATION DU FRET MARITIME
+                  {isMaritime ? 'ESTIMATION FRET MARITIME' : 'ESTIMATION FRET AÉRIEN'}
                 </span>
                 <span className="text-[10px] bg-[#E2001A] text-white font-bold px-2 py-0.5 uppercase tracking-wider">
                   DÉDOUANÉ {company.addressDakar.toUpperCase()}
@@ -177,7 +367,9 @@ export default function CbmSimulator({ settings }) {
               {hasValidInput ? (
                 <div className="py-6 space-y-4">
                   <div>
-                    <div className="text-xs text-slate-500 uppercase tracking-wider">Volume total calculé</div>
+                    <div className="text-xs text-slate-500 uppercase tracking-wider">
+                      {isMaritime ? 'Volume total calculé' : 'Poids total facturable'}
+                    </div>
                     <div className="text-2xl sm:text-3xl font-bold text-[#042442] font-mono mt-1">
                       {result.unit}
                     </div>
@@ -185,7 +377,7 @@ export default function CbmSimulator({ settings }) {
                   </div>
 
                   <div className="pt-3 border-t border-slate-100">
-                    <div className="text-xs text-slate-500 uppercase tracking-wider">Tarif unitaire appliqué</div>
+                    <div className="text-xs text-slate-500 uppercase tracking-wider">Tarif appliqué</div>
                     <div className="text-sm font-bold text-[#042442] mt-0.5">{result.rateApplied}</div>
                   </div>
 
@@ -200,13 +392,20 @@ export default function CbmSimulator({ settings }) {
                 <div className="py-12 text-center space-y-3">
                   <Calculator className="w-10 h-10 text-slate-300 mx-auto" />
                   <h4 className="text-sm font-bold text-[#042442] uppercase tracking-wider">
-                    En attente de vos dimensions
+                    {isMaritime ? 'En attente de vos dimensions' : 'En attente du poids en Kg'}
                   </h4>
                   <p className="text-xs text-[#475569] max-w-xs mx-auto leading-relaxed">
-                    Saisissez la longueur, largeur, hauteur et le nombre de cartons ci-contre pour calculer instantanément le cubage CBM et le montant estimé de votre expédition maritime.
+                    {isMaritime
+                      ? 'Saisissez la longueur, largeur, hauteur et le nombre de cartons ci-contre pour calculer instantanément le cubage CBM et le montant estimé.'
+                      : 'Indiquez le poids estimé en Kg de votre colis pour obtenir le coût direct dédouané à Dakar au prix fixe au kilogramme.'}
                   </p>
                   <div className="pt-2 text-xs text-slate-400">
-                    Tarif officiel en vigueur : <strong className="text-[#042442]">{formatFCFA(seaRate)} / CBM</strong>
+                    Tarif officiel en vigueur :{' '}
+                    <strong className="text-[#042442]">
+                      {isMaritime
+                        ? `${formatFCFA(seaRate)} / CBM`
+                        : `${formatFCFA(airService === 'AIR_EXPRESS' ? airExpressRate : airNormalRate)} / Kg`}
+                    </strong>
                   </div>
                 </div>
               )}
@@ -216,7 +415,9 @@ export default function CbmSimulator({ settings }) {
               {hasValidInput ? (
                 <a
                   href={`https://wa.me/${waTargetPhone}?text=${encodeURIComponent(
-                    `Bonjour Minane Cargo, je souhaite expédier par conteneur maritime depuis la Chine : ${result.unit} pour une estimation de ${formatFCFA(result.totalAmount)}. Merci de me communiquer l'adresse de réception en Chine.`
+                    isMaritime
+                      ? `Bonjour Minane Cargo, je souhaite expédier par conteneur maritime depuis la Chine : ${result.unit} pour une estimation de ${formatFCFA(result.totalAmount)}. Merci de me communiquer l'adresse de réception en Chine.`
+                      : `Bonjour Minane Cargo, je souhaite expédier par fret aérien Chine ➔ Dakar : ${result.unit} (${result.details}) pour une estimation de ${formatFCFA(result.totalAmount)}. Merci de me communiquer l'adresse de réception à Guangzhou pour le prochain vol fixe.`
                   )}`}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -231,12 +432,12 @@ export default function CbmSimulator({ settings }) {
                   disabled
                   className="w-full py-3.5 bg-slate-100 text-slate-400 font-bold text-xs uppercase tracking-wider text-center cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  <span>Renseignez les dimensions</span>
+                  <span>{isMaritime ? 'Renseignez les dimensions' : 'Indiquez le poids en Kg'}</span>
                 </button>
               )}
 
               <p className="text-[11px] text-slate-400 text-center">
-                Tarif indicatif garanti pour marchandises générales hors matières dangereuses sous réglementation IMO.
+                Tarif indicatif garanti pour marchandises générales hors matières dangereuses et batteries non homologuées.
               </p>
             </div>
 

@@ -38,9 +38,14 @@ const settingsController = {
     try {
       const {
         maritimeCbmRate,
+        airNormalKgRate,
+        airExpressKgRate,
         nextCutoffDate,
         nextLoadingDate,
         nextEstimatedArrival,
+        nextAirCutoffDate,
+        nextAirDepartureDate,
+        nextAirArrivalDate,
         announcementBanner,
         phoneDakar,
         phoneGuangzhou,
@@ -58,9 +63,26 @@ const settingsController = {
         cleanMaritimeRate = parsed;
       }
 
+      let cleanAirNormalRate = undefined;
+      if (airNormalKgRate !== undefined && airNormalKgRate !== null && airNormalKgRate !== '') {
+        const parsed = parseInt(airNormalKgRate, 10);
+        if (!isNaN(parsed) && parsed > 0 && parsed <= 5000000) cleanAirNormalRate = parsed;
+      }
+
+      let cleanAirExpressRate = undefined;
+      if (airExpressKgRate !== undefined && airExpressKgRate !== null && airExpressKgRate !== '') {
+        const parsed = parseInt(airExpressKgRate, 10);
+        if (!isNaN(parsed) && parsed > 0 && parsed <= 5000000) cleanAirExpressRate = parsed;
+      }
+
       const cleanCutoff = nextCutoffDate && !isNaN(new Date(nextCutoffDate).getTime()) ? new Date(nextCutoffDate) : null;
       const cleanLoading = nextLoadingDate && !isNaN(new Date(nextLoadingDate).getTime()) ? new Date(nextLoadingDate) : null;
       const cleanArrival = nextEstimatedArrival && !isNaN(new Date(nextEstimatedArrival).getTime()) ? new Date(nextEstimatedArrival) : null;
+
+      const cleanAirCutoff = nextAirCutoffDate && !isNaN(new Date(nextAirCutoffDate).getTime()) ? new Date(nextAirCutoffDate) : null;
+      const cleanAirDeparture = nextAirDepartureDate && !isNaN(new Date(nextAirDepartureDate).getTime()) ? new Date(nextAirDepartureDate) : null;
+      const cleanAirArrival = nextAirArrivalDate && !isNaN(new Date(nextAirArrivalDate).getTime()) ? new Date(nextAirArrivalDate) : null;
+
       const cleanBanner = announcementBanner ? announcementBanner.toString().substring(0, 300) : null;
 
       const cleanPhoneDakar = phoneDakar !== undefined ? String(phoneDakar).trim().substring(0, 50) : undefined;
@@ -73,9 +95,14 @@ const settingsController = {
         where: { id: 1 },
         update: {
           ...(cleanMaritimeRate !== undefined && { maritimeCbmRate: cleanMaritimeRate }),
+          ...(cleanAirNormalRate !== undefined && { airNormalKgRate: cleanAirNormalRate }),
+          ...(cleanAirExpressRate !== undefined && { airExpressKgRate: cleanAirExpressRate }),
           ...(nextCutoffDate !== undefined && { nextCutoffDate: cleanCutoff }),
           ...(nextLoadingDate !== undefined && { nextLoadingDate: cleanLoading }),
           ...(nextEstimatedArrival !== undefined && { nextEstimatedArrival: cleanArrival }),
+          ...(nextAirCutoffDate !== undefined && { nextAirCutoffDate: cleanAirCutoff }),
+          ...(nextAirDepartureDate !== undefined && { nextAirDepartureDate: cleanAirDeparture }),
+          ...(nextAirArrivalDate !== undefined && { nextAirArrivalDate: cleanAirArrival }),
           ...(announcementBanner !== undefined && { announcementBanner: cleanBanner }),
           ...(cleanPhoneDakar !== undefined && { phoneDakar: cleanPhoneDakar }),
           ...(cleanPhoneGz !== undefined && { phoneGuangzhou: cleanPhoneGz }),
@@ -86,9 +113,14 @@ const settingsController = {
         create: {
           id: 1,
           maritimeCbmRate: cleanMaritimeRate || 165000,
+          airNormalKgRate: cleanAirNormalRate || 8500,
+          airExpressKgRate: cleanAirExpressRate || 11000,
           nextCutoffDate: cleanCutoff,
           nextLoadingDate: cleanLoading,
           nextEstimatedArrival: cleanArrival,
+          nextAirCutoffDate: cleanAirCutoff,
+          nextAirDepartureDate: cleanAirDeparture,
+          nextAirArrivalDate: cleanAirArrival,
           announcementBanner: cleanBanner,
           phoneDakar: cleanPhoneDakar || '+221 70 596 12 76',
           phoneGuangzhou: cleanPhoneGz || '+86 137 1104 5051',
