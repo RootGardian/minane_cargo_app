@@ -242,14 +242,14 @@ export default function CashTab({
   const renderMethodBadge = (method) => {
     switch (method) {
       case 'WAVE':
-        return <span className="px-2 py-0.5 text-[10px] font-black uppercase bg-blue-100 text-blue-800 rounded">Wave 🌊</span>;
+        return <span className="px-2 py-0.5 text-[10px] font-black uppercase bg-blue-100 text-blue-800 rounded">Wave</span>;
       case 'ORANGE_MONEY':
-        return <span className="px-2 py-0.5 text-[10px] font-black uppercase bg-orange-100 text-orange-800 rounded">Orange Money 🍊</span>;
+        return <span className="px-2 py-0.5 text-[10px] font-black uppercase bg-orange-100 text-orange-800 rounded">Orange Money</span>;
       case 'BANK_TRANSFER':
-        return <span className="px-2 py-0.5 text-[10px] font-black uppercase bg-purple-100 text-purple-800 rounded">Virement 🏦</span>;
+        return <span className="px-2 py-0.5 text-[10px] font-black uppercase bg-purple-100 text-purple-800 rounded">Virement</span>;
       case 'CASH':
       default:
-        return <span className="px-2 py-0.5 text-[10px] font-black uppercase bg-emerald-100 text-emerald-800 rounded">Espèces 💵</span>;
+        return <span className="px-2 py-0.5 text-[10px] font-black uppercase bg-emerald-100 text-emerald-800 rounded">Espèces</span>;
     }
   };
 
@@ -695,7 +695,7 @@ export default function CashTab({
                 {filteredReceivables.length === 0 ? (
                   <tr>
                     <td colSpan="9" className="py-12 text-center text-slate-400 font-medium">
-                      Aucune créance en attente. Tous les colis sont soldés ! 🎉
+                      Aucune créance en attente. Tous les colis sont soldés !
                     </td>
                   </tr>
                 ) : (

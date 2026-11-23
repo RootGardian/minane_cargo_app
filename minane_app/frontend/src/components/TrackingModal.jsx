@@ -51,8 +51,8 @@ export default function TrackingModal({ shipment, onClose }) {
                 </h3>
                 <span className="text-[11px] px-2 py-0.5 bg-[#E2001A] text-white font-bold uppercase tracking-wider">
                   {(shipment.shippingMode || shipment.transportMode)?.startsWith('AIR')
-                    ? '✈️ FRET AÉRIEN RÉGULIER'
-                    : '🚢 FRET MARITIME'}
+                    ? 'FRET AÉRIEN RÉGULIER'
+                    : 'FRET MARITIME'}
                 </span>
               </div>
             </div>

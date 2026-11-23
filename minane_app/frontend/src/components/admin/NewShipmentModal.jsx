@@ -113,9 +113,9 @@ export default function NewShipmentModal({
                   onChange={(e) => setNewShipment({ ...newShipment, transportMode: e.target.value })}
                   className="w-full px-3 py-2 border border-slate-300 text-xs font-semibold bg-white rounded-none"
                 >
-                  <option value="MARITIME_LCL">🚢 Maritime Groupage (LCL / CBM)</option>
-                  <option value="MARITIME_FCL">🚢 Maritime Conteneur Plein (FCL)</option>
-                  <option value="AIR_NORMAL">✈️ Fret Aérien Régulier (au Kg)</option>
+                  <option value="MARITIME_LCL">Maritime Groupage (LCL / CBM)</option>
+                  <option value="MARITIME_FCL">Maritime Conteneur Plein (FCL)</option>
+                  <option value="AIR_NORMAL">Fret Aérien Régulier (au Kg)</option>
                 </select>
               </div>
 

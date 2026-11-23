@@ -250,7 +250,7 @@ export default function App() {
       {currentView !== 'admin' && (
         <>
           <Footer 
-            onOpenAdminLogin={() => setIsAdminLoginOpen(true)}
+            onOpenAdminLogin={handleOpenAdminPortal}
             onNavigate={handleNavigate}
             settings={settings}
           />

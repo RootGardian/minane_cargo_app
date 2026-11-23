@@ -24,7 +24,7 @@ export default function SettingsTab({
       setShowResetModal(false);
       setResetInput('');
       if (onDataReset) onDataReset();
-      alert('✅ Base de données vidée avec succès. Tous les colis, conteneurs et règlements ont été supprimés.');
+      alert('Base de données vidée avec succès. Tous les colis, conteneurs et règlements ont été supprimés.');
     } catch (err) {
       setResetError(err.message || 'Erreur lors de la réinitialisation.');
     } finally {
@@ -47,8 +47,7 @@ export default function SettingsTab({
       <form onSubmit={onSaveSettings} className="space-y-6">
         {/* Section Fret Maritime : Tarifs & Départs */}
         <div className="bg-[#F8FAFC] p-4 border border-slate-200">
-          <div className="flex items-center gap-2 mb-3">
-            <span className="text-base">🚢</span>
+          <div className="mb-3">
             <h3 className="text-xs font-bold text-[#042442] uppercase tracking-wider">
               Fret Maritime Groupage (Guangzhou / Nansha ➔ Port de Dakar)
             </h3>
@@ -111,8 +110,7 @@ export default function SettingsTab({
 
         {/* Section Fret Aérien : Tarif Fixe au Kg & Dates de Vol */}
         <div className="bg-[#FFF9F9] p-4 border border-rose-200">
-          <div className="flex items-center gap-2 mb-3">
-            <span className="text-base">✈️</span>
+          <div className="mb-3">
             <h3 className="text-xs font-bold text-[#E2001A] uppercase tracking-wider">
               Fret Aérien Régulier (Guangzhou CAN ➔ Dakar AIBD)
             </h3>
@@ -271,7 +269,7 @@ export default function SettingsTab({
       {/* ─── Zone Dangereuse ──────────────────────────────────────────── */}
       <div className="border-t-2 border-red-200 pt-6 mt-4">
         <h3 className="text-sm font-bold text-red-700 uppercase tracking-wider mb-1 flex items-center gap-2">
-          <span>⚠️</span> Zone Dangereuse — Réinitialisation des Données
+          Zone Dangereuse — Réinitialisation des Données
         </h3>
         <p className="text-xs text-slate-500 mb-4">
           Cette action supprime <strong>définitivement</strong> tous les colis, conteneurs, règlements et clients de la base de données.
@@ -282,7 +280,7 @@ export default function SettingsTab({
           onClick={() => { setShowResetModal(true); setResetInput(''); setResetError(''); }}
           className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white text-xs font-bold uppercase tracking-wider transition rounded-none"
         >
-          🗑️ Vider toutes les données opérationnelles
+          Vider toutes les données opérationnelles
         </button>
       </div>
 
@@ -292,7 +290,7 @@ export default function SettingsTab({
           <div className="bg-white w-full max-w-md shadow-2xl">
             <div className="bg-red-600 px-6 py-4">
               <h3 className="text-white font-bold text-sm uppercase tracking-wider">
-                ⚠️ Confirmation — Vider la base de données
+                Confirmation — Vider la base de données
               </h3>
             </div>
             <div className="p-6 space-y-4">
@@ -334,7 +332,7 @@ export default function SettingsTab({
                   disabled={resetLoading || resetInput !== 'VIDER LA BASE'}
                   className="flex-1 px-4 py-2.5 bg-red-600 text-white text-xs font-bold uppercase hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition rounded-none"
                 >
-                  {resetLoading ? 'Suppression...' : '🗑️ Confirmer la suppression'}
+                  {resetLoading ? 'Suppression...' : 'Confirmer la suppression'}
                 </button>
               </div>
             </div>
