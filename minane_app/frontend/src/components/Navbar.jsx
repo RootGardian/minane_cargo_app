@@ -40,7 +40,7 @@ export default function Navbar({
             </a>
             <span className="text-slate-300">|</span>
             <a href="#actualites" className="hover:text-[#E2001A] transition">
-              Actualités Maritimes
+              Actualités Fret (Maritime & Aérien)
             </a>
           </div>
         </div>
@@ -94,11 +94,11 @@ export default function Navbar({
               </a>
               <span className="text-slate-300">|</span>
               <a href="#services" className="hover:text-[#E2001A] transition py-2 tracking-wide uppercase">
-                Transport Maritime
+                Fret Maritime & Aérien
               </a>
               <span className="text-slate-300">|</span>
               <a href="#actualites" className="hover:text-[#E2001A] transition py-2 tracking-wide uppercase">
-                Actualités
+                Actualités & Départs
               </a>
             </nav>
           )}
@@ -113,7 +113,7 @@ export default function Navbar({
                 className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 border border-[#042442] hover:bg-[#042442] hover:text-white text-[#042442] text-xs font-bold uppercase tracking-wider transition"
               >
                 <Calculator className="w-3.5 h-3.5" />
-                <span>Simulateur CBM</span>
+                <span>Simulateur Fret (CBM / Kg)</span>
               </a>
             )}
 

@@ -1,26 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { Search, ChevronLeft, ChevronRight, Play, Pause } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, Play, Pause, Ship, Plane } from 'lucide-react';
 
 const HERO_SLIDES = [
   {
     image: '/hero_ship.jpeg',
-    title: 'Un acteur de référence du transport maritime et des solutions logistiques',
-    subtitle: 'Chine → Sénégal'
+    title: 'Fret Maritime & Fret Aérien Régulier Chine ➔ Dakar',
+    subtitle: 'Groupage conteneurs LCL au m³ & Fret aérien régulier au Kg'
   },
   {
     image: '/service_port.jpeg',
-    title: 'Liaison directe continue vers Dakar.',
-    subtitle: 'Groupage LCL & Conteneurs Pleins FCL'
+    title: 'Liaisons maritimes et aériennes continues vers le Sénégal',
+    subtitle: 'Consolidation Chine (Guangzhou) & Dédouanement complet à Dakar'
   },
   {
     image: '/service_maritime.jpeg',
-    title: 'Sécurité et traçabilité intégrale de vos marchandises conteneurisées',
-    subtitle: 'Guangzhou  → Dakar'
+    title: 'Sécurité et traçabilité intégrale de vos marchandises',
+    subtitle: 'Suivi en direct dès l\'attribution du numéro de suivi MNC'
   },
   {
     image: '/service_warehouse.jpeg',
     title: 'Hubs logistiques et consolidation de fret en Chine',
-    subtitle: 'Réception continue 6 jours sur 7'
+    subtitle: 'Entrepôts Guangzhou • Réception continue 6 jours sur 7'
   }
 ];
 
@@ -32,6 +32,7 @@ export default function HeroSection({ onTrack, trackingLoading, settings }) {
 
   const formatFCFA = (val) => new Intl.NumberFormat('fr-FR').format(val || 0) + ' FCFA';
   const seaRate = settings?.maritimeCbmRate || 165000;
+  const airRate = settings?.airNormalKgRate || 8500;
 
   // Auto-play slideshow every 5 seconds
   useEffect(() => {
@@ -88,6 +89,10 @@ export default function HeroSection({ onTrack, trackingLoading, settings }) {
         {/* Hero Content */}
         <div className="relative z-10 max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 w-full py-16 sm:py-20 lg:py-24">
           <div className="max-w-3xl space-y-6">
+
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-sm border border-white/20 text-white text-[11px] font-bold uppercase tracking-widest">
+              <span>Maritime (CBM) & Aérien (Kg)</span>
+            </div>
 
             <h1 className="text-3xl sm:text-5xl lg:text-6xl font-medium text-white tracking-tight leading-[1.12] transition-opacity duration-500 min-h-[140px] sm:min-h-[170px]">
               {HERO_SLIDES[currentSlide].title}
@@ -173,7 +178,7 @@ export default function HeroSection({ onTrack, trackingLoading, settings }) {
                   : 'text-[#475569] hover:text-[#042442]'
                 }`}
             >
-              TRACKING
+              SUIVI DE COLIS & EXPÉDITIONS
               {activeWidgetTab === 'TRACKING' && (
                 <span className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#E2001A]" />
               )}
@@ -190,7 +195,7 @@ export default function HeroSection({ onTrack, trackingLoading, settings }) {
                   : 'text-[#475569] hover:text-[#042442]'
                 }`}
             >
-              PRIX & SIMULATEUR CBM
+              GRILLE TARIFAIRE & SIMULATEUR (CBM & KG)
               {activeWidgetTab === 'PRIX' && (
                 <span className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#E2001A]" />
               )}
@@ -202,7 +207,7 @@ export default function HeroSection({ onTrack, trackingLoading, settings }) {
           {activeWidgetTab === 'TRACKING' && (
             <form onSubmit={handleSubmit} className="space-y-3">
               <label className="block text-xs font-bold text-[#042442] uppercase tracking-wide">
-                Conteneur, connaissement ou code colis <span className="text-[#E2001A]">*</span>
+                Numéro de suivi (MNC-XXXX), Conteneur ou Vol <span className="text-[#E2001A]">*</span>
               </label>
 
               <div className="flex flex-col sm:flex-row gap-3">
@@ -225,10 +230,15 @@ export default function HeroSection({ onTrack, trackingLoading, settings }) {
                 </button>
               </div>
 
-              <div className="text-xs text-[#475569] pt-1">
+              <div className="text-xs text-[#475569] pt-1 flex flex-wrap items-center justify-between gap-2">
                 <p>
-                  Pour suivre vos expéditions Guangzhou → Dakar, saisissez votre référence colis (ex: MNC-XXXX).
+                  Suivez vos expéditions maritimes (au m³) et aériennes (au kg) en direct dès la remise du code MNC.
                 </p>
+                <div className="flex items-center gap-3 text-[11px] font-semibold text-slate-500">
+                  <span className="inline-flex items-center gap-1"><Ship className="w-3.5 h-3.5 text-[#042442]" /> Maritime</span>
+                  <span>•</span>
+                  <span className="inline-flex items-center gap-1"><Plane className="w-3.5 h-3.5 text-[#E2001A]" /> Aérien</span>
+                </div>
               </div>
 
             </form>
@@ -236,16 +246,27 @@ export default function HeroSection({ onTrack, trackingLoading, settings }) {
 
           {/* Tab 2: PRIX preview link */}
           {activeWidgetTab === 'PRIX' && (
-            <div className="py-2 text-sm text-[#0B1F33]">
-              <p className="font-medium mb-3">
-                Tarif de référence en vigueur : Maritime Groupage (LCL) <strong>{formatFCFA(seaRate)} / CBM</strong> dédouané au Port de Dakar.
-              </p>
-              <a
-                href="#simulateur"
-                className="text-[#E2001A] font-bold text-xs uppercase tracking-wider hover:underline inline-flex items-center gap-1"
-              >
-                Accéder au calculateur de cubage CBM →
-              </a>
+            <div className="py-2 text-sm text-[#0B1F33] space-y-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-slate-50 border border-slate-200">
+                <div>
+                  <div className="text-xs text-slate-500 font-semibold uppercase">Fret Maritime Groupage (LCL)</div>
+                  <div className="text-base font-bold text-[#042442] font-mono mt-0.5">{formatFCFA(seaRate)} / CBM</div>
+                  <div className="text-[11px] text-slate-500">Dédouané au Port de Dakar</div>
+                </div>
+                <div>
+                  <div className="text-xs text-slate-500 font-semibold uppercase">Fret Aérien Régulier</div>
+                  <div className="text-base font-bold text-[#E2001A] font-mono mt-0.5">{formatFCFA(airRate)} / Kg</div>
+                  <div className="text-[11px] text-slate-500">Dédouané à Dakar AIBD</div>
+                </div>
+              </div>
+              <div>
+                <a
+                  href="#simulateur"
+                  className="text-[#E2001A] font-bold text-xs uppercase tracking-wider hover:underline inline-flex items-center gap-1 pt-1"
+                >
+                  Accéder au simulateur en ligne (Maritime & Aérien) →
+                </a>
+              </div>
             </div>
           )}
 

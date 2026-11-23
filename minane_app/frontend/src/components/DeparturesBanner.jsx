@@ -3,7 +3,7 @@ import { Megaphone } from 'lucide-react';
 
 export default function DeparturesBanner({ bannerText }) {
   if (!bannerText) {
-    bannerText = "Ligne maritime exclusive Guangzhou &  ➔ Port de Dakar Môle 2 • Réception continue de colis en entrepôts.";
+    bannerText = "Corridor Maritime & Aérien Chine ➔ Dakar • Conteneurs Groupage LCL au m³ & Fret Aérien Régulier au Kg • Réception continue en entrepôts.";
   }
 
   return (
@@ -19,7 +19,7 @@ export default function DeparturesBanner({ bannerText }) {
           </p>
         </div>
         <div className="hidden md:flex items-center gap-3 text-[11px] text-slate-300 font-medium shrink-0">
-          <span>Corridor : Guangzhou   ➔ Dakar</span>
+          <span>Corridor : Guangzhou ➔ Dakar (Maritime & Aérien)</span>
           <span className="text-slate-500">•</span>
           <span>Devise : FCFA (XOF)</span>
         </div>
