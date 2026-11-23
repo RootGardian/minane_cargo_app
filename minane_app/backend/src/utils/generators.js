@@ -58,7 +58,7 @@ function formatTransportMode(mode) {
  * Returns the production tracking URL or localhost for dev
  */
 function getTrackingUrl(trackingCode) {
-  const baseUrl = (process.env.APP_URL || 'http://localhost:3000').replace(/\/$/, '');
+  const baseUrl = (process.env.APP_URL || 'https://minane-cargo-app.blackcoretech.duckdns.org').replace(/\/$/, '');
   return `${baseUrl}/?track=${trackingCode}`;
 }
 

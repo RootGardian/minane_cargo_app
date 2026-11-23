@@ -6,6 +6,7 @@
 export const DEFAULT_COMPANY_INFO = {
   // Dakar (Sénégal) : l'agence à Dakar s'écrit juste "Dakar"
   name: 'Minane Cargo',
+  siteUrl: 'https://minane-cargo-app.blackcoretech.duckdns.org',
   addressDakar: 'Dakar',
   phoneDakar: '+221 70 596 12 76',
 

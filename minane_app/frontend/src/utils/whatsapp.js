@@ -17,7 +17,9 @@ export const getWAShareUrl = ({
   phoneDakar,
 }) => {
   const cleanPhone = formatPhoneForWA(phone);
-  const origin = typeof window !== 'undefined' ? window.location.origin : '';
+  const origin = typeof window !== 'undefined' && window.location.origin && !window.location.origin.includes('localhost')
+    ? window.location.origin
+    : 'https://minane-cargo-app.blackcoretech.duckdns.org';
   const trackingLink = `${origin}/?track=${trackingCode}`;
   const dakarNumber = phoneDakar || DEFAULT_COMPANY_INFO.phoneDakar;
 
